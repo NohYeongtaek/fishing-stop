@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.common)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -65,7 +66,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // Firebase 플랫폼의 BoM(Bill of Materials)을 추가합니다.
     // → Firebase 라이브러리들의 버전을 한 번에 관리해 줍니다.
-    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
 
     // Firebase AI 기능을 사용하기 위한 라이브러리를 추가합니다.
     // App Check(디버그용) 라이브러리를 함께 추가합니다.
@@ -116,10 +117,8 @@ dependencies {
     // dotsindicator
     implementation("com.tbuonomo:dotsindicator:5.1.1")
 
-    // 코드 생성기 (Moshi KSP)
-    ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.2")
-    implementation("com.google.dagger:hilt-android:2.59.2")
+    implementation("com.google.dagger:hilt-android:2.60.1")
     ksp("com.google.dagger:hilt-android-compiler:2.60.1")
     // Compose에서 hiltViewModel() 함수를 사용하기 위한 라이브러리
-    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.4.0")
 }

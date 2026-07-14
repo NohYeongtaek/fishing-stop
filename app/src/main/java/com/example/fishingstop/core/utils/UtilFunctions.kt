@@ -1,4 +1,4 @@
-package com.newBie.new_bie.core.utils
+package com.example.fishingstop.core.utils
 
 import android.os.Build
 import androidx.annotation.RequiresApi
