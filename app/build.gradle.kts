@@ -10,12 +10,12 @@ plugins {
 
 android {
     namespace = "com.example.fishingstop"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.fishingstop"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -63,7 +63,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    // Firebase 플랫폼의 BoM(Bill of Materials)을 추가합니다.
+    // → Firebase 라이브러리들의 버전을 한 번에 관리해 줍니다.
+    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
 
+    // Firebase AI 기능을 사용하기 위한 라이브러리를 추가합니다.
+    // App Check(디버그용) 라이브러리를 함께 추가합니다.
+    implementation("com.google.firebase:firebase-ai")
+    implementation("com.google.firebase:firebase-appcheck-debug")
+
+    // BoM을 사용하므로 Firebase 라이브러리에는
+    // 버전을 따로 작성하지 않아도 됩니다.
     //레트로핏
     //Retrofit
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
