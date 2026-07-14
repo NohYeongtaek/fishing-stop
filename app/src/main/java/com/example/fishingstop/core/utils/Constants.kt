@@ -1,22 +1,7 @@
-package com.newBie.new_bie.core.utils
-
-import com.newBie.new_bie.BuildConfig
+package com.example.fishingstop.core.utils
 
 object Constants {
     val TAG : String = "로그"
-}
-
-object SupabaseInitial {
-    val URL : String = BuildConfig.URL
-    val ANON_KEY : String = BuildConfig.ANON_KEY
-    val GOOGLE_WEB_CLIENT_ID : String = BuildConfig.GOOGLE_WEB_CLIENT_ID
-}
-
-object API {
-    val SUPABASE_BASE_URL : String = "${BuildConfig.URL}/functions/v1/post-function/"
-
-    val AUTHORIZATION : String = "Bearer ${BuildConfig.ANON_KEY}"
-    val CONTENT_TYPE : String = "application/json"
 }
 
 object Routes {
