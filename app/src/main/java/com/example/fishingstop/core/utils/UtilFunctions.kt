@@ -1,11 +1,8 @@
-package com.newBie.new_bie.core.utils
-
+package com.example.fishingstop.core.utils
 import android.os.Build
 import androidx.annotation.RequiresApi
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 fun getRange(currentIndex : Int, perPage : Int = 5) : String {
     var startIndex : Int = currentIndex - 1
