@@ -2,4 +2,12 @@
 <resources>
 
     <style name="Theme.Fishingstop" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Splash Screen API: 콜드 스타트 시 시스템 스플래시(아이콘)를 보여주고,
+         종료되면 postSplashScreenTheme 로 전환된다. -->
+    <style name="Theme.Fishingstop.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.Fishingstop</item>
+    </style>
 </resources>
