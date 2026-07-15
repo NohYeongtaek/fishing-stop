@@ -3,6 +3,7 @@ package com.example.fishingstop.feature.report.presentation
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,10 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -39,8 +44,9 @@ private const val UNIFIED_REPORT_NUMBER = "1394"
 /**
  * 신고 화면.
  *
- * 기획 확정 사항 반영:
- *  - 원문은 전송하지 않으며, 화면에도 "실제 전송되는 정보"(등급·점수·근거)만 보여준다.
+ * 기획 확정 사항 반영(시나리오 B — 수동 대신신고):
+ *  - 문자 원문 + 신고 대상 지표(전화번호·링크 등)를 함께 전송한다(담당자가 기관에 대신 신고).
+ *  - 자동추출된 지표를 사용자가 체크박스로 확인하고, 발신번호는 직접 입력할 수 있다.
  *  - 완료 화면: 신고 번호 + 통합신고 1394 안내 + 공식 신고 사이트 링크(사용자가 직접 클릭).
  *
  * @param onBack 취소/뒤로
@@ -71,7 +77,13 @@ fun ReportScreen(
                 }
 
             is ReportUiState.Ready ->
-                ReadyContent(state = s, onSubmit = viewModel::submit, onBack = onBack)
+                ReadyContent(
+                    state = s,
+                    onToggleIndicator = viewModel::toggleIndicator,
+                    onManualPhoneChange = viewModel::setManualPhone,
+                    onSubmit = viewModel::submit,
+                    onBack = onBack
+                )
 
             is ReportUiState.Success ->
                 SuccessContent(
@@ -108,6 +120,8 @@ fun ReportScreen(
 @Composable
 private fun ReadyContent(
     state: ReportUiState.Ready,
+    onToggleIndicator: (Int) -> Unit,
+    onManualPhoneChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -122,7 +136,8 @@ private fun ReadyContent(
     ) {
         Text("신고하기", style = MaterialTheme.typography.headlineSmall)
         Text(
-            "아래 분석 정보만 익명으로 전송됩니다. 메시지 원문과 개인정보는 전송되지 않습니다.",
+            "선택한 신고 대상과 문자 원문이 익명으로 전송되며, 담당자가 확인해 수사기관에 신고합니다. " +
+                "신고자 개인정보는 수집하지 않습니다.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -138,6 +153,7 @@ private fun ReadyContent(
                 InfoRow(label = "위험 등급", value = ui.title)
                 InfoRow(label = "AI 참고 점수", value = "${state.riskScore}점 / 100")
                 InfoRow(label = "검사 방법", value = state.methodLabel)
+                InfoRow(label = "문자 원문", value = "포함됨")
                 if (state.signals.isNotEmpty()) {
                     Text("판단 근거", style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -147,6 +163,55 @@ private fun ReadyContent(
                 }
             }
         }
+
+        // ── 신고 대상 확인 ──
+        Text(
+            "신고 대상 확인",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            "체크한 항목만 신고에 포함됩니다.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        if (state.autoIndicators.isEmpty()) {
+            Text(
+                "자동으로 찾은 신고 대상이 없어요. 발신 번호를 직접 입력해 주세요.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        } else {
+            state.autoIndicators.forEachIndexed { index, indicator ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onToggleIndicator(index) }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = index in state.selectedIndicators,
+                        onCheckedChange = { onToggleIndicator(index) }
+                    )
+                    Column(Modifier.padding(start = 8.dp)) {
+                        Text(indicator.type.label, style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(indicator.value, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        }
+
+        // 발신번호 직접 입력
+        OutlinedTextField(
+            value = state.manualPhone,
+            onValueChange = onManualPhoneChange,
+            label = { Text("발신 전화번호 (선택)") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            modifier = Modifier.fillMaxWidth()
+        )
 
         DisclaimerText()
 
