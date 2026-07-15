@@ -14,19 +14,21 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 /**
  * 스플래시 화면.
- * 동의 상태가 로딩되면 다음 화면으로 즉시 분기한다.
+ * 최초 실행 상태가 로딩되면 다음 화면으로 즉시 분기한다.
  *
- * 분기 규칙(기획 확정):
- *  - 공유(ACTION_SEND) 진입 → 곧장 검사 플로우(동의는 검사 게이트가 처리)
- *  - 동의 화면을 아직 본 적 없음(최초 실행) → 동의 화면
- *  - 그 외(동의했든 둘러보기를 택했든) → 홈
+ * 분기 규칙(동의 필수):
+ *  - 미동의 → 동의 화면 (거부 시 앱 종료)
+ *  - 동의 & 온보딩 미열람 → 온보딩
+ *  - 동의 & 온보딩 열람 & 공유 진입 → 문자 검사(자동 입력)
+ *  - 동의 & 온보딩 열람 → 홈
  *
- * @param sharedText 공유로 앱이 시작된 경우의 원문
+ * @param sharedText 공유(ACTION_SEND)로 앱이 시작된 경우의 원문
  */
 @Composable
 fun SplashScreen(
     sharedText: String?,
     onNavigateToConsent: () -> Unit,
+    onNavigateToOnboarding: () -> Unit,
     onNavigateToHome: () -> Unit,
     onNavigateToAnalyze: (String) -> Unit,
     viewModel: SplashViewModel = hiltViewModel()
@@ -36,8 +38,9 @@ fun SplashScreen(
     LaunchedEffect(status) {
         val s = status ?: return@LaunchedEffect // 로딩 중: 대기
         when {
+            !s.agreed -> onNavigateToConsent()
+            !s.onboardingSeen -> onNavigateToOnboarding()
             !sharedText.isNullOrBlank() -> onNavigateToAnalyze(sharedText)
-            !s.seen -> onNavigateToConsent()
             else -> onNavigateToHome()
         }
     }

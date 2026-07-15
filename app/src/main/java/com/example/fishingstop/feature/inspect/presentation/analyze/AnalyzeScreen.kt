@@ -23,13 +23,11 @@ import com.example.fishingstop.core.ui.components.PrimaryButton
  *
  * @param onResult 분석 성공 → 결과 화면(id)으로 이동
  * @param onCancel 취소/뒤로
- * @param onRequestConsent 미동의 상태에서 "동의하러 가기" → 동의 화면(fromGate)으로 이동
  */
 @Composable
 fun AnalyzeScreen(
     onResult: (Long) -> Unit,
     onCancel: () -> Unit,
-    onRequestConsent: () -> Unit,
     viewModel: AnalyzeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -53,28 +51,6 @@ fun AnalyzeScreen(
                     text = "메시지를 분석하고 있어요…",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(top = 16.dp)
-                )
-            }
-
-            is AnalyzeUiState.NeedConsent -> {
-                Text(
-                    text = "검사를 하려면 동의가 필요해요",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    text = "메시지 내용을 AI 분석을 위해 외부로 전송하는 것에 동의해야 검사할 수 있어요.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                PrimaryButton(
-                    text = "동의하러 가기",
-                    onClick = onRequestConsent,
-                    modifier = Modifier.padding(top = 24.dp)
-                )
-                PrimaryButton(
-                    text = "취소",
-                    onClick = onCancel,
-                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
 

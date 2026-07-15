@@ -17,10 +17,12 @@ import com.example.fishingstop.ui.theme.FishingstopTheme
  * 설정(테마/어르신 모드)을 읽어 전체 UI에 적용한 뒤 네비게이션 그래프를 그린다.
  *
  * @param sharedText 공유(ACTION_SEND)로 전달된 텍스트(없으면 null)
+ * @param onExitApp  동의 거부 시 앱 종료 콜백
  */
 @Composable
 fun FishingStopApp(
     sharedText: String?,
+    onExitApp: () -> Unit,
     appViewModel: AppViewModel = hiltViewModel()
 ) {
     val themeMode by appViewModel.themeMode.collectAsState()
@@ -39,7 +41,7 @@ fun FishingStopApp(
         val base = LocalDensity.current
         val density = if (elderMode) Density(base.density, base.fontScale * 1.3f) else base
         CompositionLocalProvider(LocalDensity provides density) {
-            FishingStopNavGraph(sharedText = sharedText)
+            FishingStopNavGraph(sharedText = sharedText, onExitApp = onExitApp)
         }
     }
 }

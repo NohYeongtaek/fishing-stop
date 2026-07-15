@@ -37,7 +37,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             // 테마/어르신 모드 적용은 FishingStopApp 루트에서 담당한다.
-            FishingStopApp(sharedText = sharedText)
+            FishingStopApp(
+                sharedText = sharedText,
+                // 동의 거부 시 앱 종료(태스크까지 제거해 재실행 시 다시 동의 화면부터).
+                onExitApp = { finishAndRemoveTask() }
+            )
         }
     }
 

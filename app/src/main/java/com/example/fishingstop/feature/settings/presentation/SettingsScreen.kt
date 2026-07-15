@@ -46,26 +46,6 @@ fun SettingsScreen(
 ) {
     val themeMode by viewModel.themeMode.collectAsState()
     val elderMode by viewModel.elderMode.collectAsState()
-    val consentAgreed by viewModel.consentAgreed.collectAsState()
-
-    // 동의 철회 확인 다이얼로그
-    var showRevokeDialog by remember { mutableStateOf(false) }
-    if (showRevokeDialog) {
-        AlertDialog(
-            onDismissRequest = { showRevokeDialog = false },
-            title = { Text("동의 철회") },
-            text = { Text("AI 분석 동의를 철회하면 검사 기능을 사용할 수 없게 됩니다.\n(예방 교육·검사 기록 등은 계속 이용 가능)") },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.setConsent(false)
-                    showRevokeDialog = false
-                }) { Text("철회", color = MaterialTheme.colorScheme.error) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showRevokeDialog = false }) { Text("취소") }
-            }
-        )
-    }
 
     Column(
         modifier = Modifier
@@ -118,26 +98,6 @@ fun SettingsScreen(
 
         // ── 개인정보 ──
         SettingGroup(title = "개인정보") {
-            // AI 분석 동의 상태 관리(철회 시 검사만 제한)
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text("AI 분석 동의", style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        if (consentAgreed) "동의함 — 검사 기능 사용 가능" else "미동의 — 검사 기능 제한됨",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Switch(
-                    checked = consentAgreed,
-                    onCheckedChange = { wantAgree ->
-                        if (wantAgree) viewModel.setConsent(true) else showRevokeDialog = true
-                    }
-                )
-            }
             NavigationRow(text = "개인정보 처리방침 보기", onClick = onOpenPrivacy)
         }
 

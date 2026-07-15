@@ -19,13 +19,14 @@ sealed interface Routes {
 
     /**
      * 동의 화면(외부 AI 전송 안내 + 개인정보 처리방침 동의).
-     * 비동의 시에도 앱 이용(교육·설정 등)은 가능하고, 검사 기능만 제한된다.
-     *
-     * @param fromGate true면 "검사 직전 동의 게이트"에서 진입한 경우로,
-     *                 동의 완료 시 홈이 아니라 이전 화면(검사)으로 복귀한다.
+     * 동의는 필수이며, 거부하면 앱을 종료한다. 동의해야만 다음 화면으로 진입한다.
      */
     @Serializable
-    data class Consent(val fromGate: Boolean = false) : Routes
+    data object Consent : Routes
+
+    /** 온보딩(사용설명). 동의 후 최초 1회만 노출한다. */
+    @Serializable
+    data object Onboarding : Routes
 
     /** 개인정보 처리방침 전문(인앱 정적 페이지) */
     @Serializable

@@ -16,6 +16,7 @@ import com.example.fishingstop.feature.inspect.presentation.check.LinkCheckScree
 import com.example.fishingstop.feature.inspect.presentation.check.TextCheckScreen
 import com.example.fishingstop.feature.inspect.presentation.qr.QrScanScreen
 import com.example.fishingstop.feature.inspect.presentation.result.InspectResultScreen
+import com.example.fishingstop.feature.onboarding.presentation.OnboardingScreen
 import com.example.fishingstop.feature.privacy.presentation.PrivacyPolicyScreen
 import com.example.fishingstop.feature.report.presentation.ReportScreen
 import com.example.fishingstop.feature.settings.presentation.NoticeScreen
@@ -29,22 +30,29 @@ import com.example.fishingstop.feature.splash.presentation.SplashScreen
  * 미리보기(Preview)/테스트가 쉬워지고 재사용성이 올라간다.
  *
  * @param sharedText 공유(ACTION_SEND)로 앱이 시작된 경우의 원문(없으면 null).
+ * @param onExitApp  동의 거부 시 앱을 종료하기 위한 콜백(Activity.finish 등).
  */
 @Composable
 fun FishingStopNavGraph(
     sharedText: String? = null,
+    onExitApp: () -> Unit = {},
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
         navController = navController,
         startDestination = Routes.Splash
     ) {
-        // 스플래시 → 동의 노출 여부/공유 텍스트에 따라 분기
+        // 스플래시 → 동의/온보딩/공유 여부에 따라 분기
         composable<Routes.Splash> {
             SplashScreen(
                 sharedText = sharedText,
                 onNavigateToConsent = {
-                    navController.navigate(Routes.Consent()) {
+                    navController.navigate(Routes.Consent) {
+                        popUpTo(Routes.Splash) { inclusive = true }
+                    }
+                },
+                onNavigateToOnboarding = {
+                    navController.navigate(Routes.Onboarding) {
                         popUpTo(Routes.Splash) { inclusive = true }
                     }
                 },
@@ -63,30 +71,27 @@ fun FishingStopNavGraph(
             )
         }
 
-        // 동의 화면 (최초 실행 또는 검사 게이트에서 진입)
-        composable<Routes.Consent> { backStackEntry ->
-            val route = backStackEntry.toRoute<Routes.Consent>()
+        // 동의 화면 (필수) — 동의: 온보딩으로 / 거부: 앱 종료
+        composable<Routes.Consent> {
             ConsentScreen(
                 onAgreed = {
-                    if (route.fromGate) {
-                        // 검사 게이트에서 온 경우: 검사 화면으로 복귀(자동으로 분석 재개)
-                        navController.popBackStack()
-                    } else {
-                        navController.navigate(Routes.Home) {
-                            popUpTo<Routes.Consent> { inclusive = true }
-                        }
+                    navController.navigate(Routes.Onboarding) {
+                        popUpTo<Routes.Consent> { inclusive = true }
                     }
                 },
-                onSkip = {
-                    if (route.fromGate) {
-                        navController.popBackStack()
-                    } else {
-                        navController.navigate(Routes.Home) {
-                            popUpTo<Routes.Consent> { inclusive = true }
-                        }
-                    }
-                },
+                onDecline = onExitApp,
                 onOpenPrivacyPolicy = { navController.navigate(Routes.PrivacyPolicy) }
+            )
+        }
+
+        // 온보딩(최초 1회) → 완료 시 홈
+        composable<Routes.Onboarding> {
+            OnboardingScreen(
+                onFinish = {
+                    navController.navigate(Routes.Home) {
+                        popUpTo<Routes.Onboarding> { inclusive = true }
+                    }
+                }
             )
         }
 
@@ -162,11 +167,7 @@ fun FishingStopNavGraph(
                         popUpTo<Routes.Analyze> { inclusive = true }
                     }
                 },
-                onCancel = { navController.popBackStack() },
-                onRequestConsent = {
-                    // 검사 직전 동의 게이트: 동의 후 이 화면(Analyze)으로 복귀한다.
-                    navController.navigate(Routes.Consent(fromGate = true))
-                }
+                onCancel = { navController.popBackStack() }
             )
         }
 

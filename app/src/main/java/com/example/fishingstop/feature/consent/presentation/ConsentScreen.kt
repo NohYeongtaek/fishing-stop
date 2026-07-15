@@ -9,34 +9,58 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.fishingstop.core.ui.components.PrimaryButton
 
 /**
- * 최초 실행 동의 화면.
+ * 최초 실행 동의 화면. (동의 필수)
  *
  * 스펙 요구사항 반영:
  *  - 메시지/이미지 내용을 AI 분석을 위해 외부로 전송한다는 안내를 명시
  *  - 개인정보 처리방침 전문 링크(인앱 페이지) 제공
- *  - 명시적 동의 버튼(동의해야 핵심 기능 사용 가능)
+ *  - 명시적 동의 버튼. 동의해야만 다음 화면으로 진입하며, 거부하면 앱을 종료한다.
  *
- * @param onAgreed 동의 저장 완료 후 다음 화면으로 이동
- * @param onSkip   동의하지 않고 둘러보기(검사 기능만 제한된 채 홈 진입)
+ * @param onAgreed 동의 저장 완료 후 다음 화면(온보딩/홈)으로 이동
+ * @param onDecline 동의하지 않음 → 앱 종료
  * @param onOpenPrivacyPolicy 개인정보 처리방침 전문 화면으로 이동
  */
 @Composable
 fun ConsentScreen(
     onAgreed: () -> Unit,
-    onSkip: () -> Unit,
+    onDecline: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
     viewModel: ConsentViewModel = hiltViewModel()
 ) {
+    // 실수 종료를 막기 위한 확인 다이얼로그
+    var showDeclineDialog by remember { mutableStateOf(false) }
+    if (showDeclineDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeclineDialog = false },
+            title = { Text("동의하지 않으시겠어요?") },
+            text = { Text("피싱멈춰!는 동의하셔야 이용할 수 있어요.\n동의하지 않으면 앱이 종료됩니다.") },
+            confirmButton = {
+                TextButton(onClick = onDecline) {
+                    Text("종료", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeclineDialog = false }) { Text("계속 보기") }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -76,16 +100,16 @@ fun ConsentScreen(
             onClick = { viewModel.agree(onCompleted = onAgreed) }
         )
 
-        // 비동의 경로: 검사만 제한되고 예방교육·설정 등은 자유롭게 이용 가능(기획 확정).
-        TextButton(
-            onClick = onSkip,
+        // 동의는 필수: 거부하면 앱을 종료한다.
+        OutlinedButton(
+            onClick = { showDeclineDialog = true },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("동의하지 않고 둘러보기")
+            Text("동의하지 않음")
         }
 
         Text(
-            text = "동의하지 않으면 검사 기능만 제한되며, 예방 교육과 설정은 이용할 수 있습니다.",
+            text = "동의하지 않으면 앱을 이용할 수 없어 종료됩니다.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
