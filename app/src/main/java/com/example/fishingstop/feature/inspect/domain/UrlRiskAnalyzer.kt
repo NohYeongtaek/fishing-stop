@@ -152,8 +152,9 @@ class UrlRiskAnalyzer @Inject constructor() {
         URL_REGEX.findAll(text).map { it.value }.distinct().toList()
 
     companion object {
-        // scheme이 있으면 공백 전까지 통째로(IP·퓨니코드·@위장 포함), 없으면 알파벳 TLD 도메인만 추출
-        private val URL_REGEX =
+        // scheme이 있으면 공백 전까지 통째로(IP·퓨니코드·@위장 포함), 없으면 알파벳 TLD 도메인만 추출.
+        // 신고 지표 추출(ExtractIndicatorsUseCase)에서도 재사용하므로 internal 로 노출한다(중복 구현 방지).
+        internal val URL_REGEX =
             Regex("(?i)(?:https?://[^\\s]+|\\b(?:[a-z0-9\\-]+\\.)+[a-z]{2,}(?::\\d+)?(?:/[^\\s]*)?)")
 
         private val IP_REGEX = Regex("^\\d{1,3}(\\.\\d{1,3}){3}$")

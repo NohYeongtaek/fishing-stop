@@ -9,11 +9,14 @@ import com.example.fishingstop.core.util.Anonymizer
 import com.example.fishingstop.core.util.RiskLevel
 import com.example.fishingstop.core.util.toUserMessage
 import com.example.fishingstop.feature.inspect.domain.GetInspectionResultUseCase
+import com.example.fishingstop.feature.report.domain.ExtractIndicatorsUseCase
 import com.example.fishingstop.feature.report.domain.SubmitReportUseCase
+import com.example.fishingstop.feature.report.domain.model.Indicator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,14 +25,19 @@ sealed interface ReportUiState {
     data object Loading : ReportUiState
 
     /**
-     * 신고 전 확인: "실제로 전송되는 정보"를 그대로 보여준다.
-     * (원문은 전송되지 않으므로 미리보기에도 원문을 넣지 않는다.)
+     * 신고 전 확인 화면.
+     * @param autoIndicators      원문에서 자동 추출된 신고 대상 후보
+     * @param selectedIndicators  사용자가 신고에 포함하기로 체크한 인덱스
+     * @param manualPhone         직접 입력한 발신 전화번호
      */
     data class Ready(
         val riskLevel: RiskLevel,
         val riskScore: Int,
         val methodLabel: String,
-        val signals: List<String>
+        val signals: List<String>,
+        val autoIndicators: List<Indicator>,
+        val selectedIndicators: Set<Int> = emptySet(),
+        val manualPhone: String = ""
     ) : ReportUiState
 
     data object Submitting : ReportUiState
@@ -41,12 +49,13 @@ sealed interface ReportUiState {
 
 /**
  * 신고 ViewModel.
- * 전송될 정보(등급·점수·근거)만 미리 보여주고, 확인 시 서버로 전송한다.
+ * 전송될 정보(등급·점수·근거·원문)와 신고 대상 지표를 보여주고, 확인 시 서버로 전송한다.
  */
 @HiltViewModel
 class ReportViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getInspectionResultUseCase: GetInspectionResultUseCase,
+    private val extractIndicatorsUseCase: ExtractIndicatorsUseCase,
     private val submitReportUseCase: SubmitReportUseCase
 ) : ViewModel() {
 
@@ -65,17 +74,42 @@ class ReportViewModel @Inject constructor(
                     riskLevel = inspection.riskLevel,
                     riskScore = inspection.riskScore,
                     methodLabel = inspection.method.label,
-                    // 실제 전송본과 동일하게 마스킹된 근거를 보여준다.
-                    signals = inspection.signals.map { Anonymizer.mask(it) }
+                    signals = inspection.signals.map { Anonymizer.mask(it) },
+                    autoIndicators = extractIndicatorsUseCase(inspection.inputText)
                 )
             }
         }
     }
 
+    /** 자동추출 지표 체크 토글. */
+    fun toggleIndicator(index: Int) {
+        _uiState.update { state ->
+            if (state !is ReportUiState.Ready) return@update state
+            val next = state.selectedIndicators.toMutableSet().apply {
+                if (!add(index)) remove(index)
+            }
+            state.copy(selectedIndicators = next)
+        }
+    }
+
+    /** 발신번호 직접 입력. */
+    fun setManualPhone(value: String) {
+        _uiState.update { state ->
+            if (state is ReportUiState.Ready) state.copy(manualPhone = value) else state
+        }
+    }
+
     fun submit() {
+        val ready = _uiState.value as? ReportUiState.Ready ?: return
+        val confirmed = ready.autoIndicators.filterIndexed { i, _ -> i in ready.selectedIndicators }
+
         _uiState.value = ReportUiState.Submitting
         viewModelScope.launch {
-            submitReportUseCase(args.inspectionId)
+            submitReportUseCase(
+                inspectionId = args.inspectionId,
+                confirmedIndicators = confirmed,
+                manualPhone = ready.manualPhone
+            )
                 .onSuccess { number -> _uiState.value = ReportUiState.Success(number) }
                 .onFailure { e -> _uiState.value = ReportUiState.Error(e.toUserMessage()) }
         }

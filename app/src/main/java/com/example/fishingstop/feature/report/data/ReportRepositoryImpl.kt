@@ -15,8 +15,8 @@ import kotlin.coroutines.resumeWithException
 /**
  * 신고를 Firestore "reports" 컬렉션에 저장하는 구현체.
  *
- * - 저장 문서에는 위험도 메타데이터(등급·점수·방법·마스킹된 근거)만 담는다.
- *   메시지 원문과 사용자 식별 정보는 절대 넣지 않는다.
+ * 시나리오 B(수동 대신신고): 담당자가 수사기관에 대신 신고할 수 있도록 원문(contentText)과
+ * 신고 대상 지표(indicators)를 함께 저장한다. 사용자 식별 정보는 담지 않는다(익명).
  * - Firestore Task(콜백)를 코루틴으로 감싼다(추가 의존성 없이).
  */
 class ReportRepositoryImpl @Inject constructor(
@@ -25,13 +25,19 @@ class ReportRepositoryImpl @Inject constructor(
 ) : ReportRepository {
 
     override suspend fun submit(report: Report): String = withContext(ioDispatcher) {
-        // ⚠️ 원문(inputText)은 어떤 형태로도 전송하지 않는다(기획 확정 사항).
         val data = mapOf(
             "reportNumber" to report.reportNumber,
             "riskLevel" to report.riskLevel.name,
             "riskScore" to report.riskScore,
             "method" to report.method.name,
             "signals" to report.signals,
+            "contentText" to report.contentText,
+            // 지표는 map 리스트로 직렬화
+            "indicators" to report.indicators.map {
+                mapOf("type" to it.type.name, "value" to it.value, "source" to it.source.name)
+            },
+            "status" to report.status,
+            "handledAt" to report.handledAt,
             "createdAt" to report.createdAt
         )
 
