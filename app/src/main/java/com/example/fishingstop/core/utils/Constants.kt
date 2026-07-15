@@ -37,6 +37,10 @@ object Routes {
     const val GUESTBOOKS = "guestbooks"
     const val NOTIFICATION_SETTING = "notification_setting"
     const val TERMS = "terms"
+
+    // 검사(inspect) 관련 화면
+    const val QR_SCAN = "qr_scan"
+    const val INSPECT_RESULT = "inspect_result"
 }
 
 

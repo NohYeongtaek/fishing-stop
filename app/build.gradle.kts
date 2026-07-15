@@ -121,4 +121,13 @@ dependencies {
     ksp("com.google.dagger:hilt-android-compiler:2.60.1")
     // Compose에서 hiltViewModel() 함수를 사용하기 위한 라이브러리
     implementation("androidx.hilt:hilt-navigation-compose:1.4.0")
+
+    // QR 코드 촬영 화면 - 카메라 미리보기/프레임 분석
+    val cameraXVersion = "1.4.1"
+    implementation("androidx.camera:camera-core:${cameraXVersion}")
+    implementation("androidx.camera:camera-camera2:${cameraXVersion}")
+    implementation("androidx.camera:camera-lifecycle:${cameraXVersion}")
+    implementation("androidx.camera:camera-view:${cameraXVersion}")
+    // QR/바코드 온디바이스 인식
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
 }

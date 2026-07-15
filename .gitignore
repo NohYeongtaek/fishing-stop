@@ -25,3 +25,12 @@ replay_pid*
 
 # Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
 .kotlin/
+
+# Android Studio / Gradle local state
+.idea/
+/build/
+.gradle/8.13/
+.gradle/9.4.1/
+.gradle/buildOutputCleanup/
+.gradle/vcs-1/
+.gradle/file-system.probe
