@@ -9,24 +9,35 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = EmeraldLight,
+    onPrimary = OnEmeraldContainerLight,
+    secondary = EmeraldLight,
+    onSecondary = OnEmeraldContainerLight,
+    tertiary = Pink80,
+    primaryContainer = EmeraldContainerDark,
+    onPrimaryContainer = OnEmeraldContainerDark,
+    secondaryContainer = EmeraldContainerDark,
+    onSecondaryContainer = OnEmeraldContainerDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Emerald,
+    onPrimary = Color.White,
+    secondary = Emerald,
+    onSecondary = Color.White,
+    tertiary = Pink40,
+    primaryContainer = EmeraldContainerLight,
+    onPrimaryContainer = OnEmeraldContainerLight,
+    secondaryContainer = EmeraldContainerLight,
+    onSecondaryContainer = OnEmeraldContainerLight
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
     onTertiary = Color.White,
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F),
@@ -36,8 +47,8 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun FishingstopTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // 브랜드 포인트 컬러로 톤을 통일하기 위해 기본값은 끈다(Android 12+ 배경화면 기반 동적 색상 미사용).
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

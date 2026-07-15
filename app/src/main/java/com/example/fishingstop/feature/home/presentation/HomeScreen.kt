@@ -2,6 +2,13 @@ package com.example.fishingstop.feature.home.presentation
 
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.StartOffset
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,10 +23,12 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,8 +38,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,7 +85,12 @@ fun HomeScreen(
                         selected = selectedTab == index,
                         onClick = { selectedTab = index },
                         icon = { Icon(tab.icon, contentDescription = tab.label) },
-                        label = { Text(tab.label) }
+                        label = { Text(tab.label, fontWeight = FontWeight.Bold) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = Color.Transparent
+                        )
                     )
                 }
             }
@@ -109,13 +125,21 @@ private fun HomeTabContent() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // 중앙 큰 원형 버튼(와이어프레임): 누르면 기본 메시지 앱을 연다.
-        Button(
-            onClick = { openMessagingApp(context) },
-            shape = CircleShape,
-            modifier = Modifier.size(200.dp)
+        // 중앙 큰 원형 버튼(와이어프레임): 누르면 기본 메시지 앱을 연다. 물결 애니메이션으로 주목도를 높인다.
+        Box(
+            modifier = Modifier.size(300.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Text("검사 시작", fontSize = 24.sp, textAlign = TextAlign.Center)
+            RippleWaves(color = MaterialTheme.colorScheme.primary)
+
+            Button(
+                onClick = { openMessagingApp(context) },
+                shape = CircleShape,
+                modifier = Modifier.size(200.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("검사 시작", fontSize = 24.sp, textAlign = TextAlign.Center)
+            }
         }
 
         Text(
@@ -125,6 +149,38 @@ private fun HomeTabContent() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 32.dp)
         )
+    }
+}
+
+/** 버튼 주변으로 퍼지며 사라지는 물결 3개를 위상차를 두고 반복 재생한다. */
+@Composable
+private fun RippleWaves(color: Color) {
+    val waveCount = 3
+    val durationMillis = 3000
+    val infiniteTransition = rememberInfiniteTransition(label = "ripple")
+    val progresses = List(waveCount) { i ->
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis, easing = LinearEasing),
+                initialStartOffset = StartOffset(durationMillis / waveCount * i)
+            ),
+            label = "wave$i"
+        )
+    }
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val baseRadius = 100.dp.toPx()
+        val maxExtra = 50.dp.toPx()
+        progresses.forEach { progress ->
+            val value = progress.value
+            drawCircle(
+                color = color,
+                radius = baseRadius + maxExtra * value,
+                alpha = (1f - value) * 0.4f
+            )
+        }
     }
 }
 

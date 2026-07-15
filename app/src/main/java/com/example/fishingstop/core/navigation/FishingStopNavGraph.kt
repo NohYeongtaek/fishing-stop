@@ -1,5 +1,7 @@
 package com.example.fishingstop.core.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -40,7 +42,20 @@ fun FishingStopNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.Splash
+        startDestination = Routes.Splash,
+        // 옆으로 슬라이드되는 화면 전환(진입: 왼쪽으로, 뒤로가기: 오른쪽으로). 기본(700ms)보다 2배 빠르게.
+        enterTransition = {
+            slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(350))
+        },
+        exitTransition = {
+            slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(350))
+        },
+        popEnterTransition = {
+            slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(350))
+        },
+        popExitTransition = {
+            slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(350))
+        }
     ) {
         // 스플래시 → 동의/온보딩/공유 여부에 따라 분기
         composable<Routes.Splash> {

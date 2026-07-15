@@ -34,12 +34,13 @@ fun FishingStopApp(
         ThemeMode.DARK -> true
     }
 
-    // 어르신 모드에서는 고대비를 위해 동적 색상을 끄고, 글씨를 크게 키운다.
-    FishingstopTheme(darkTheme = darkTheme, dynamicColor = !elderMode) {
+    // 브랜드 포인트 컬러(에메랄드)로 톤을 통일하기 위해 동적 색상은 항상 끈다.
+    // 어르신 모드에서는 추가로 글씨를 크게 키운다.
+    FishingstopTheme(darkTheme = darkTheme, dynamicColor = false) {
         // 분기(if/else)로 감싸면 컴포지션 구조가 달라져 NavGraph가 재생성(내비게이션 리셋)된다.
         // 항상 CompositionLocalProvider로 감싸고, 밀도(글씨 배율)만 바꿔 그 문제를 피한다.
         val base = LocalDensity.current
-        val density = if (elderMode) Density(base.density, base.fontScale * 1.3f) else base
+        val density = if (elderMode) Density(base.density, base.fontScale * 1.4f) else base
         CompositionLocalProvider(LocalDensity provides density) {
             FishingStopNavGraph(sharedText = sharedText, onExitApp = onExitApp)
         }
