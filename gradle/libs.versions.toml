@@ -33,4 +33,6 @@ firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appc
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android"}
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+# 타입세이프 네비게이션(@Serializable Routes)과 kotlinx-serialization 사용에 필수인 컴파일러 플러그인
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 

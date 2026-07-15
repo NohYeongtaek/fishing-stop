@@ -6,6 +6,9 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+
+    // @Serializable Routes / DTO 직렬화를 위한 kotlin serialization 플러그인
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -46,6 +49,12 @@ android {
     }
 }
 
+// Room이 컴파일 시점에 생성하는 DB 스키마(JSON)를 저장할 위치.
+// 스키마를 버전 관리(git)하면 마이그레이션 검증/테스트에 활용할 수 있다.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -56,6 +65,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    // Icons.Filled.* 등 머티리얼 아이콘. material3의 전이 의존성에 기대지 않고 명시 선언(런타임 누락 방지).
+    implementation("androidx.compose.material:material-icons-core")
     implementation(libs.firebase.common)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -122,12 +133,39 @@ dependencies {
     // Compose에서 hiltViewModel() 함수를 사용하기 위한 라이브러리
     implementation("androidx.hilt:hilt-navigation-compose:1.4.0")
 
-    // QR 코드 촬영 화면 - 카메라 미리보기/프레임 분석
-    val cameraXVersion = "1.4.1"
-    implementation("androidx.camera:camera-core:${cameraXVersion}")
-    implementation("androidx.camera:camera-camera2:${cameraXVersion}")
-    implementation("androidx.camera:camera-lifecycle:${cameraXVersion}")
-    implementation("androidx.camera:camera-view:${cameraXVersion}")
-    // QR/바코드 온디바이스 인식
+    // ─────────────────────────────────────────────────────────────
+    // 피싱멈춰! 추가 의존성 (Phase 1 초기 세팅)
+    // ⚠️ 아래 버전들은 AGP 9.1.1 / Kotlin 2.3.10 / compileSdk 37 환경 기준
+    //    권장 좌표이며, 최신 호환 버전은 Gradle Sync로 확정 필요.
+    // ─────────────────────────────────────────────────────────────
+
+    // Room: 로컬 DB (검사 기록 저장 / 오프라인 우선 저장 후 동기화)
+    val roomVersion = "2.8.2"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")          // Coroutine/Flow 지원
+    ksp("androidx.room:room-compiler:$roomVersion")                // 어노테이션 처리(KSP)
+
+    // ML Kit: 온디바이스 OCR (캡처 이미지 → 텍스트). 네트워크 전송 없이 기기 내 처리.
+    implementation("com.google.mlkit:text-recognition:16.0.1")         // 라틴 문자
+    implementation("com.google.mlkit:text-recognition-korean:16.0.1")  // 한글 인식
+    // ML Kit: 바코드/QR 스캔 (직접검사 탭의 QR 코드 촬영)
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
+
+    // CameraX: QR 촬영용 카메라 프리뷰/분석 파이프라인
+    val cameraxVersion = "1.4.2"
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    // Firebase: 인증/DB/푸시 (BoM으로 버전 일괄 관리 — 위에서 BoM 이미 추가됨)
+    implementation("com.google.firebase:firebase-auth")        // 익명 인증(신고자 식별 최소화)
+    implementation("com.google.firebase:firebase-firestore")   // 신고 데이터 저장
+    implementation("com.google.firebase:firebase-messaging")   // FCM 푸시
+
+    // Coroutine: Android 메인 디스패처(Dispatchers.Main) 지원
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
+
+    // Splash Screen API: 시스템 표준 스플래시(콜드 스타트 로고 표시)
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
