@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -15,10 +16,12 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -43,9 +46,10 @@ import java.util.concurrent.Executors
 /**
  * QR 검사 화면(FO_02_01).
  *
- * - CameraX 프리뷰 + ML Kit 바코드 스캔(온디바이스).
- * - QR을 화면에 비추면 자동 인식되어 곧바로 검사 플로우로 넘어간다.
- *   (별도 촬영 버튼보다 실수·조작이 적어 어르신 사용성에 유리)
+ * - CameraX 프리뷰(고정 크기) + ML Kit 바코드 스캔(온디바이스), 항상 프레임을 분석해
+ *   화면에 QR이 보이는지 여부를 실시간으로 안내한다.
+ * - "QR코드 검사하기" 버튼을 눌렀을 때 QR이 보이면 그 값으로 검사 플로우로 넘어가고,
+ *   보이지 않으면 검사할 수 없다는 안내만 하고 화면에 머문다.
  * - CAMERA 런타임 권한: 거부 시 안내, "다시 묻지 않음"까지 거부되면 설정 이동 버튼 제공.
  * - QR 속 URL은 절대 자동으로 열지 않는다 — 검사로만 전달(안전 원칙).
  *
@@ -80,15 +84,47 @@ fun QrScanScreen(
     ) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
             if (hasPermission) {
-                QrCameraPreview(onDetected = onDetected)
-                Text(
-                    "QR코드를 화면 중앙에 맞춰 주세요",
-                    style = AppTheme.type.subtitle,
-                    color = androidx.compose.ui.graphics.Color.White,
+                // 카메라가 매 프레임 분석한 결과. null이면 화면에 QR이 안 보이는 상태.
+                var qrValue by remember { mutableStateOf<String?>(null) }
+
+                Column(
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 24.dp)
-                )
+                        .fillMaxSize()
+                        .padding(AppTheme.spacing.screenX),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = if (qrValue != null) "QR코드가 감지되었어요" else "QR코드가 보이지 않아요",
+                        style = AppTheme.type.subtitle,
+                        color = if (qrValue != null) AppTheme.colors.greenPrimary else AppTheme.colors.textSecondary,
+                        modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)
+                    )
+                    QrCameraPreview(
+                        onResult = { qrValue = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .clipToBounds()
+                    )
+                    PrimaryButton(
+                        text = "QR코드 검사하기",
+                        onClick = {
+                            val value = qrValue
+                            if (value != null) {
+                                onDetected(value)
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "QR코드가 보이지 않아 검사할 수 없어요.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 48.dp)
+                    )
+                }
             } else {
                 Column(
                     modifier = Modifier
@@ -127,12 +163,19 @@ fun QrScanScreen(
     }
 }
 
-/** CameraX 프리뷰 + QR 분석 파이프라인. 화면을 떠나면 카메라/스레드를 정리한다. */
+/**
+ * CameraX 프리뷰 + QR 분석 파이프라인. 화면을 떠나면 카메라/스레드를 정리한다.
+ *
+ * @param onResult 매 프레임 분석 결과(값 또는 null = 화면에 QR 없음)를 알린다.
+ */
 @Composable
-private fun QrCameraPreview(onDetected: (String) -> Unit) {
+private fun QrCameraPreview(
+    onResult: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val currentOnDetected by rememberUpdatedState(onDetected)
+    val currentOnResult by rememberUpdatedState(onResult)
 
     val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
 
@@ -145,9 +188,14 @@ private fun QrCameraPreview(onDetected: (String) -> Unit) {
     }
 
     AndroidView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         factory = { ctx ->
-            val previewView = PreviewView(ctx)
+            val previewView = PreviewView(ctx).apply {
+                // SurfaceView(기본 PERFORMANCE 모드)는 다른 컴포저블과 겹칠 때
+                // Compose 레이아웃 경계를 무시하고 위로 그려지는 문제가 있어
+                // 전체화면이 아닌 이 화면에서는 TextureView 기반으로 강제한다.
+                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+            }
             val providerFuture = ProcessCameraProvider.getInstance(ctx)
             providerFuture.addListener({
                 val provider = providerFuture.get()
@@ -162,10 +210,12 @@ private fun QrCameraPreview(onDetected: (String) -> Unit) {
                     .also {
                         it.setAnalyzer(
                             analysisExecutor,
-                            QrCodeAnalyzer { value ->
-                                // 콜백은 분석 스레드에서 오므로 메인 스레드로 넘긴다.
-                                previewView.post { currentOnDetected(value) }
-                            }
+                            QrCodeAnalyzer(
+                                onResult = { value ->
+                                    // 콜백은 분석 스레드에서 오므로 메인 스레드로 넘긴다.
+                                    previewView.post { currentOnResult(value) }
+                                }
+                            )
                         )
                     }
 
