@@ -8,52 +8,38 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.fishingstop.feature.education.domain.EducationCategory
+import com.example.fishingstop.core.ui.components.AppCard
+import com.example.fishingstop.core.ui.components.AppScaffold
+import com.example.fishingstop.core.ui.components.AppTopBar
+import com.example.fishingstop.core.ui.components.WarnBox
+import com.example.fishingstop.ui.theme.AppTheme
 
 /**
  * 예방 교육 상세 화면.
- * 유형 요약 + 의심 신호 체크리스트 + 대응 방법을 보여준다.
+ * 유형 요약 + 의심 신호 체크리스트(주의 박스) + 대응 방법(카드)을 보여준다.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EducationDetailScreen(
     onBack: () -> Unit,
     viewModel: EducationDetailViewModel = hiltViewModel()
 ) {
     val category = viewModel.category
+    val colors = AppTheme.colors
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(category?.title ?: "예방 교육") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로")
-                    }
-                }
-            )
-        }
+    AppScaffold(
+        topBar = { AppTopBar(title = category?.title ?: "예방 교육", onBack = onBack) }
     ) { innerPadding ->
         if (category == null) {
             Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
-                Text("콘텐츠를 찾을 수 없습니다.")
+                Text("콘텐츠를 찾을 수 없습니다.", style = AppTheme.type.body, color = colors.textSecondary)
             }
-            return@Scaffold
+            return@AppScaffold
         }
 
         Column(
@@ -61,25 +47,31 @@ fun EducationDetailScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(horizontal = AppTheme.spacing.screenX, vertical = AppTheme.spacing.cardPad),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.stackGap)
         ) {
-            Text(category.summary, style = MaterialTheme.typography.bodyLarge)
+            Text(category.summary, style = AppTheme.type.body, color = colors.textPrimary)
 
-            Section(title = "이런 신호를 의심하세요", items = category.warningSigns, bullet = "⚠️")
-            Section(title = "이렇게 대처하세요", items = category.tips, bullet = "✅")
-        }
-    }
-}
+            // 의심 신호 = 주의(warn) 박스
+            WarnBox {
+                Text("이런 신호를 의심하세요", style = AppTheme.type.cardLabel, color = colors.warnText)
+                category.warningSigns.forEach { line ->
+                    Row(Modifier.padding(top = 6.dp)) {
+                        Text("⚠️ ", style = AppTheme.type.body)
+                        Text(line, style = AppTheme.type.body, color = colors.warnText)
+                    }
+                }
+            }
 
-@Composable
-private fun Section(title: String, items: List<String>, bullet: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        items.forEach { line ->
-            Row {
-                Text("$bullet ", style = MaterialTheme.typography.bodyLarge)
-                Text(line, style = MaterialTheme.typography.bodyLarge)
+            // 대처법 = 일반 카드
+            AppCard {
+                Text("이렇게 대처하세요", style = AppTheme.type.cardLabel, color = colors.textPrimary)
+                category.tips.forEach { line ->
+                    Row(Modifier.padding(top = 6.dp)) {
+                        Text("✅ ", style = AppTheme.type.body)
+                        Text(line, style = AppTheme.type.body, color = colors.textPrimary)
+                    }
+                }
             }
         }
     }

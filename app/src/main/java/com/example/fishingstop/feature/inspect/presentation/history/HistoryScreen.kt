@@ -1,7 +1,6 @@
 package com.example.fishingstop.feature.inspect.presentation.history
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,14 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,12 +23,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.fishingstop.core.ui.components.AppCard
+import com.example.fishingstop.core.ui.components.AppFilterChip
+import com.example.fishingstop.core.ui.components.StatusBadge
 import com.example.fishingstop.feature.inspect.domain.model.InspectionResult
-import com.example.fishingstop.feature.inspect.presentation.result.toUi
+import com.example.fishingstop.ui.theme.AppTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -52,6 +48,7 @@ fun HistoryScreen(
 ) {
     val items by viewModel.items.collectAsState()
     val favoritesOnly by viewModel.favoritesOnly.collectAsState()
+    val colors = AppTheme.colors
 
     // 길게 눌러 삭제를 요청한 항목(확인 다이얼로그 표시용)
     var pendingDelete by remember { mutableStateOf<InspectionResult?>(null) }
@@ -59,38 +56,48 @@ fun HistoryScreen(
     pendingDelete?.let { target ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("기록 삭제") },
-            text = { Text("이 검사 기록을 삭제할까요?\n삭제하면 되돌릴 수 없어요.") },
+            containerColor = colors.cardBg,
+            title = { Text("기록 삭제", style = AppTheme.type.cardLabel, color = colors.textPrimary) },
+            text = {
+                Text(
+                    "이 검사 기록을 삭제할까요?\n삭제하면 되돌릴 수 없어요.",
+                    style = AppTheme.type.body,
+                    color = colors.textSecondary
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.delete(target)
                     pendingDelete = null
-                }) { Text("삭제", color = MaterialTheme.colorScheme.error) }
+                }) { Text("삭제", color = colors.dangerPrimary, style = AppTheme.type.button) }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("취소") }
+                TextButton(onClick = { pendingDelete = null }) {
+                    Text("취소", color = colors.textSecondary, style = AppTheme.type.button)
+                }
             }
         )
     }
 
-    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+    Column(Modifier.fillMaxSize().padding(horizontal = AppTheme.spacing.screenX)) {
         Text(
             "검사 기록",
-            style = MaterialTheme.typography.headlineSmall,
+            style = AppTheme.type.h1,
+            color = colors.textPrimary,
             modifier = Modifier.padding(vertical = 12.dp)
         )
 
         // 필터: 전체 / 즐겨찾기
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(
+            AppFilterChip(
+                text = "전체",
                 selected = !favoritesOnly,
-                onClick = { viewModel.setFavoritesOnly(false) },
-                label = { Text("전체") }
+                onClick = { viewModel.setFavoritesOnly(false) }
             )
-            FilterChip(
+            AppFilterChip(
+                text = "즐겨찾기",
                 selected = favoritesOnly,
-                onClick = { viewModel.setFavoritesOnly(true) },
-                label = { Text("즐겨찾기") }
+                onClick = { viewModel.setFavoritesOnly(true) }
             )
         }
 
@@ -98,14 +105,15 @@ fun HistoryScreen(
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     if (favoritesOnly) "즐겨찾기한 기록이 없습니다." else "검사 기록이 없습니다.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = AppTheme.type.body,
+                    color = colors.textTertiary
                 )
             }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.listGap)
             ) {
                 items(items, key = { it.id }) { item ->
                     HistoryItem(
@@ -128,27 +136,14 @@ private fun HistoryItem(
     onLongClick: () -> Unit,
     onToggleFavorite: () -> Unit
 ) {
-    val ui = item.riskLevel.toUi()
+    val colors = AppTheme.colors
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            // 짧게 누르면 상세, 길게 누르면 삭제 확인
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+    AppCard(
+        // 짧게 누르면 상세, 길게 누르면 삭제 확인
+        modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 위험 등급 뱃지
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(ui.container)
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
-            ) {
-                Text(ui.title, color = ui.onContainer, fontWeight = FontWeight.Bold)
-            }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            StatusBadge(riskLevel = item.riskLevel)
 
             Column(
                 modifier = Modifier
@@ -157,12 +152,13 @@ private fun HistoryItem(
             ) {
                 Text(
                     text = "${item.method.label} · ${formatDate(item.createdAt)}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = AppTheme.type.caption,
+                    color = colors.textTertiary
                 )
                 Text(
                     text = item.inputText.replace("\n", " ").take(40).ifBlank { "(내용 없음)" },
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = AppTheme.type.body,
+                    color = colors.textPrimary,
                     maxLines = 1
                 )
             }
@@ -171,8 +167,8 @@ private fun HistoryItem(
             IconButton(onClick = onToggleFavorite) {
                 Text(
                     text = if (item.isFavorite) "★" else "☆",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = if (item.isFavorite) ui.container else MaterialTheme.colorScheme.onSurfaceVariant
+                    style = AppTheme.type.h1,
+                    color = if (item.isFavorite) colors.star else colors.textTertiary
                 )
             }
         }

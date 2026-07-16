@@ -5,18 +5,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.example.fishingstop.core.ui.components.AppScaffold
+import com.example.fishingstop.core.ui.components.AppTopBar
+import com.example.fishingstop.ui.theme.AppTheme
 
 /**
  * 개인정보 처리방침 전문(인앱 정적 페이지).
@@ -24,31 +18,22 @@ import androidx.compose.ui.unit.dp
  * Play 스토어 등록 요건상 동일 내용을 외부에서 접근 가능한 URL로도 준비해야 하며,
  * 확정되면 웹뷰로 그 URL을 로드하거나 이 인앱 텍스트와 동기화한다.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacyPolicyScreen(onBack: () -> Unit) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("개인정보 처리방침") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로")
-                    }
-                }
-            )
-        }
+    AppScaffold(
+        topBar = { AppTopBar(title = "개인정보 처리방침", onBack = onBack) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp)
+                .padding(AppTheme.spacing.screenX)
         ) {
             Text(
                 text = PRIVACY_POLICY_TEXT,
-                style = MaterialTheme.typography.bodyMedium
+                style = AppTheme.type.body,
+                color = AppTheme.colors.textSecondary
             )
         }
     }

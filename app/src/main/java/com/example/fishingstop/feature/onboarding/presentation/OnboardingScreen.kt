@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,12 +20,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.fishingstop.core.ui.components.AppScaffold
 import com.example.fishingstop.core.ui.components.PrimaryButton
+import com.example.fishingstop.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
 /** 온보딩 페이지 데이터. */
@@ -71,69 +71,72 @@ fun OnboardingScreen(
     val pagerState = rememberPagerState(pageCount = { PAGES.size })
     val scope = rememberCoroutineScope()
     val isLastPage = pagerState.currentPage == PAGES.lastIndex
+    val colors = AppTheme.colors
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.weight(1f)
-        ) { page ->
-            val item = PAGES[page]
-            Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(item.emoji, fontSize = 72.sp)
-                Spacer(Modifier.size(24.dp))
-                Text(
-                    item.title,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.size(12.dp))
-                Text(
-                    item.body,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        // 페이지 인디케이터(점)
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.Center
+    AppScaffold { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(AppTheme.spacing.screenX)
         ) {
-            repeat(PAGES.size) { index ->
-                val selected = pagerState.currentPage == index
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .size(if (selected) 10.dp else 8.dp)
-                        .background(
-                            color = if (selected) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outlineVariant,
-                            shape = CircleShape
-                        )
-                )
-            }
-        }
-
-        PrimaryButton(
-            text = if (isLastPage) "시작하기" else "다음",
-            onClick = {
-                if (isLastPage) {
-                    viewModel.complete(onDone = onFinish)
-                } else {
-                    scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f)
+            ) { page ->
+                val item = PAGES[page]
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(item.emoji, fontSize = 72.sp)
+                    Spacer(Modifier.size(24.dp))
+                    Text(
+                        item.title,
+                        style = AppTheme.type.h1,
+                        color = colors.textPrimary,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.size(12.dp))
+                    Text(
+                        item.body,
+                        style = AppTheme.type.body,
+                        color = colors.textSecondary,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
-        )
+
+            // 페이지 인디케이터(점)
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(PAGES.size) { index ->
+                    val selected = pagerState.currentPage == index
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(if (selected) 10.dp else 8.dp)
+                            .background(
+                                color = if (selected) colors.greenPrimary else colors.borderInput,
+                                shape = CircleShape
+                            )
+                    )
+                }
+            }
+
+            PrimaryButton(
+                text = if (isLastPage) "시작하기" else "다음",
+                onClick = {
+                    if (isLastPage) {
+                        viewModel.complete(onDone = onFinish)
+                    } else {
+                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                    }
+                }
+            )
+        }
     }
 }

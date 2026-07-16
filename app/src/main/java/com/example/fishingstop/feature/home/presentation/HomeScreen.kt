@@ -9,6 +9,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,12 +26,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,17 +34,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.fishingstop.core.ui.components.AppBottomBar
+import com.example.fishingstop.core.ui.components.AppScaffold
+import com.example.fishingstop.core.ui.components.BottomBarItem
 import com.example.fishingstop.feature.education.presentation.EducationScreen
 import com.example.fishingstop.feature.inspect.presentation.history.HistoryScreen
 import com.example.fishingstop.feature.inspect.presentation.select.InspectSelectScreen
 import com.example.fishingstop.feature.settings.presentation.SettingsScreen
+import com.example.fishingstop.ui.theme.AppTheme
 
 /**
  * 홈 화면(하단 탭 컨테이너) — 와이어프레임 확정 5탭 구조.
@@ -56,6 +55,8 @@ import com.example.fishingstop.feature.settings.presentation.SettingsScreen
  * 탭: 홈 / 직접검사 / 검사기록 / 피싱예방 / 설정
  *  - 홈: 중앙 큰 원형 "검사 시작" 버튼(메시지 앱 열기) + 공유 방법 가이드
  *  - 직접검사: QR·링크·이미지·문자 4종 선택(FO_02)
+ *
+ * 선택 탭 표시는 (알약 인디케이터가 아니라) 아이콘+글씨 색 변화 방식을 유지한다(AppBottomBar).
  *
  * @param onQr/onLink/onImage/onText 직접검사 방식별 화면으로 이동
  * @param onOpenResult 검사기록 항목 → 결과 화면
@@ -77,23 +78,18 @@ fun HomeScreen(
     // 백스택 저장 상태에 함께 보존한다(remember 는 백스택 이탈 시 초기화됨).
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
-    Scaffold(
+    AppScaffold(
         bottomBar = {
-            NavigationBar {
-                HomeTab.entries.forEachIndexed { index, tab ->
-                    NavigationBarItem(
+            AppBottomBar(
+                items = HomeTab.entries.mapIndexed { index, tab ->
+                    BottomBarItem(
+                        label = tab.label,
+                        icon = tab.icon,
                         selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        icon = { Icon(tab.icon, contentDescription = tab.label) },
-                        label = { Text(tab.label, fontWeight = FontWeight.Bold) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = Color.Transparent
-                        )
+                        onClick = { selectedTab = index }
                     )
                 }
-            }
+            )
         }
     ) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
@@ -117,42 +113,67 @@ fun HomeScreen(
 @Composable
 private fun HomeTabContent() {
     val context = LocalContext.current
+    val colors = AppTheme.colors
+    val circle = AppTheme.sizes.homeCircle
+    val elder = AppTheme.elder
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(AppTheme.spacing.screenX),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // 중앙 큰 원형 버튼(와이어프레임): 누르면 기본 메시지 앱을 연다. 물결 애니메이션으로 주목도를 높인다.
+        // 중앙 큰 원형 버튼(와이어프레임): 누르면 기본 메시지 앱을 연다.
+        // 물결 애니메이션(RippleWaves)으로 주목도를 높인다 — 기존 인터랙션 유지.
         Box(
-            modifier = Modifier.size(300.dp),
+            modifier = Modifier.size(circle + 96.dp),
             contentAlignment = Alignment.Center
         ) {
-            RippleWaves(color = MaterialTheme.colorScheme.primary)
+            RippleWaves(color = colors.greenPrimary)
+
+            // 어르신 모드: 원 둘레에 4dp 흰 테두리(스펙)로 대비를 높인다.
+            val buttonModifier = Modifier
+                .size(circle)
+                .then(
+                    if (elder) Modifier.border(4.dp, Color.White, CircleShape) else Modifier
+                )
 
             Button(
                 onClick = { openMessagingApp(context) },
                 shape = CircleShape,
-                modifier = Modifier.size(200.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                modifier = buttonModifier,
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = colors.onGreen
+                )
             ) {
-                Text("검사 시작", fontSize = 24.sp, textAlign = TextAlign.Center)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.radialGradient(colors.greenGradient),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("검사 시작", style = AppTheme.type.h1, color = colors.onGreen, textAlign = TextAlign.Center)
+                }
             }
         }
 
         Text(
             text = "메시지 앱에서 의심 문자를 길게 눌러\n[공유] → [피싱멈춰!] 를 선택하면\n바로 검사할 수 있어요.",
-            style = MaterialTheme.typography.bodyLarge,
+            style = AppTheme.type.body,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = colors.textSecondary,
             modifier = Modifier.padding(top = 32.dp)
         )
     }
 }
 
-/** 버튼 주변으로 퍼지며 사라지는 물결 3개를 위상차를 두고 반복 재생한다. */
+/** 버튼 주변으로 퍼지며 사라지는 물결 3개를 위상차를 두고 반복 재생한다. 크기는 Box에 비례. */
 @Composable
 private fun RippleWaves(color: Color) {
     val waveCount = 3
@@ -171,13 +192,14 @@ private fun RippleWaves(color: Color) {
     }
 
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val baseRadius = 100.dp.toPx()
-        val maxExtra = 50.dp.toPx()
+        val maxR = size.minDimension / 2f
+        val baseRadius = maxR * 0.72f
+        val extra = maxR * 0.28f
         progresses.forEach { progress ->
             val value = progress.value
             drawCircle(
                 color = color,
-                radius = baseRadius + maxExtra * value,
+                radius = baseRadius + extra * value,
                 alpha = (1f - value) * 0.4f
             )
         }
