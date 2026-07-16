@@ -38,8 +38,8 @@ import com.example.fishingstop.core.ui.components.SecondaryButton
 import com.example.fishingstop.feature.inspect.presentation.result.riskUi
 import com.example.fishingstop.ui.theme.AppTheme
 
-/** 경찰청 보이스피싱·사이버범죄 통합 신고 사이트 */
-private const val OFFICIAL_REPORT_URL = "https://counterscam112.go.kr"
+/** 전기통신금융사기 통합대응단(피싱안심SOS) 공식 신고 사이트. www 없는 도메인은 DNS 미해석이라 www 필수. */
+private const val OFFICIAL_REPORT_URL = "https://www.counterscam112.go.kr"
 
 /** 보이스피싱 통합신고 전화번호(와이어프레임 FO_01_01_01) */
 private const val UNIFIED_REPORT_NUMBER = "1394"
