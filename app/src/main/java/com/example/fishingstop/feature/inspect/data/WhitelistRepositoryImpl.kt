@@ -2,7 +2,7 @@ package com.example.fishingstop.feature.inspect.data
 
 import com.example.fishingstop.core.database.dao.WhitelistDao
 import com.example.fishingstop.core.util.IoDispatcher
-import com.example.fishingstop.feature.inspect.domain.WhitelistRepository
+import com.example.fishingstop.feature.inspect.domain.repository.WhitelistRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

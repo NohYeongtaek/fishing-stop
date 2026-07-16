@@ -2,9 +2,9 @@ package com.example.fishingstop.feature.inspect.presentation.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fishingstop.feature.inspect.domain.DeleteInspectionUseCase
-import com.example.fishingstop.feature.inspect.domain.ObserveInspectionsUseCase
-import com.example.fishingstop.feature.inspect.domain.SetFavoriteUseCase
+import com.example.fishingstop.feature.inspect.domain.usecase.DeleteInspectionUseCase
+import com.example.fishingstop.feature.inspect.domain.usecase.ObserveInspectionsUseCase
+import com.example.fishingstop.feature.inspect.domain.usecase.SetFavoriteUseCase
 import com.example.fishingstop.feature.inspect.domain.model.InspectionResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

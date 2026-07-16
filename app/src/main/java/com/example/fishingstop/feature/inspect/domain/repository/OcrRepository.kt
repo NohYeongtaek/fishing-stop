@@ -1,4 +1,4 @@
-package com.example.fishingstop.feature.inspect.domain
+package com.example.fishingstop.feature.inspect.domain.repository
 
 import android.net.Uri
 

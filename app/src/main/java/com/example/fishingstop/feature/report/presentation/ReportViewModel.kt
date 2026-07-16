@@ -8,7 +8,7 @@ import com.example.fishingstop.core.navigation.Routes
 import com.example.fishingstop.core.util.Anonymizer
 import com.example.fishingstop.core.util.RiskLevel
 import com.example.fishingstop.core.util.toUserMessage
-import com.example.fishingstop.feature.inspect.domain.GetInspectionResultUseCase
+import com.example.fishingstop.feature.inspect.domain.usecase.GetInspectionResultUseCase
 import com.example.fishingstop.feature.report.domain.ExtractIndicatorsUseCase
 import com.example.fishingstop.feature.report.domain.SubmitReportUseCase
 import com.example.fishingstop.feature.report.domain.model.Indicator

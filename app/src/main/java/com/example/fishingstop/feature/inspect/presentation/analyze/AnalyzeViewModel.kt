@@ -7,8 +7,8 @@ import androidx.navigation.toRoute
 import com.example.fishingstop.core.navigation.Routes
 import com.example.fishingstop.core.util.InspectMethod
 import com.example.fishingstop.core.util.toUserMessage
-import com.example.fishingstop.feature.inspect.domain.AnalyzeMessageUseCase
-import com.example.fishingstop.feature.inspect.domain.AnalyzeUrlUseCase
+import com.example.fishingstop.feature.inspect.domain.usecase.AnalyzeMessageUseCase
+import com.example.fishingstop.feature.inspect.domain.usecase.AnalyzeUrlUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.example.fishingstop.core.navigation.Routes
-import com.example.fishingstop.feature.inspect.domain.ObserveInspectionResultUseCase
+import com.example.fishingstop.feature.inspect.domain.usecase.ObserveInspectionResultUseCase
 import com.example.fishingstop.feature.inspect.domain.model.InspectionResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted

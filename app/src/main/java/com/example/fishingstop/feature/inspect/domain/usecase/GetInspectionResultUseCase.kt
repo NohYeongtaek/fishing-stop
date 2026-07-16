@@ -1,5 +1,6 @@
-package com.example.fishingstop.feature.inspect.domain
+package com.example.fishingstop.feature.inspect.domain.usecase
 
+import com.example.fishingstop.feature.inspect.domain.repository.InspectionRepository
 import com.example.fishingstop.feature.inspect.domain.model.InspectionResult
 import javax.inject.Inject
 
