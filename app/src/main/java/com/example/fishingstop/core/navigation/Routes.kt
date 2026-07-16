@@ -83,7 +83,11 @@ sealed interface Routes {
     @Serializable
     data class EducationDetail(val categoryId: String) : Routes
 
-    /** 공지사항(FO_05_01): 월별 목록 + 아코디언 */
+    /** 공지사항(FO_05_01): Firestore 목록 + 당겨서 새로고침 */
     @Serializable
     data object NoticeList : Routes
+
+    /** 공지 작성(관리자 전용): 설정의 숨은 PIN 게이트를 통과해야 진입 */
+    @Serializable
+    data object NoticeWrite : Routes
 }

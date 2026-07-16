@@ -20,8 +20,9 @@ import com.example.fishingstop.feature.inspect.presentation.qr.QrScanScreen
 import com.example.fishingstop.feature.inspect.presentation.result.InspectResultScreen
 import com.example.fishingstop.feature.onboarding.presentation.OnboardingScreen
 import com.example.fishingstop.feature.privacy.presentation.PrivacyPolicyScreen
+import com.example.fishingstop.feature.notice.presentation.NoticeListScreen
+import com.example.fishingstop.feature.notice.presentation.NoticeWriteScreen
 import com.example.fishingstop.feature.report.presentation.ReportScreen
-import com.example.fishingstop.feature.settings.presentation.NoticeScreen
 import com.example.fishingstop.feature.splash.presentation.SplashScreen
 
 /**
@@ -125,7 +126,8 @@ fun FishingStopNavGraph(
                 onOpenResult = { id -> navController.navigate(Routes.InspectResult(id)) },
                 onOpenEducation = { categoryId -> navController.navigate(Routes.EducationDetail(categoryId)) },
                 onOpenNotice = { navController.navigate(Routes.NoticeList) },
-                onOpenPrivacy = { navController.navigate(Routes.PrivacyPolicy) }
+                onOpenPrivacy = { navController.navigate(Routes.PrivacyPolicy) },
+                onOpenNoticeWrite = { navController.navigate(Routes.NoticeWrite) }
             )
         }
 
@@ -209,9 +211,17 @@ fun FishingStopNavGraph(
             EducationDetailScreen(onBack = { navController.popBackStack() })
         }
 
-        // 공지사항(월별 아코디언)
+        // 공지사항(Firestore 목록 + 당겨서 새로고침)
         composable<Routes.NoticeList> {
-            NoticeScreen(onBack = { navController.popBackStack() })
+            NoticeListScreen(onBack = { navController.popBackStack() })
+        }
+
+        // 공지 작성(관리자 PIN 게이트 통과 후 진입) → 등록 성공 시 뒤로
+        composable<Routes.NoticeWrite> {
+            NoticeWriteScreen(
+                onDone = { navController.popBackStack() },
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
