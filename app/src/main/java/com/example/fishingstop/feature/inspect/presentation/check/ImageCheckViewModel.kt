@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fishingstop.core.util.toUserMessage
-import com.example.fishingstop.feature.inspect.domain.ExtractTextFromImageUseCase
+import com.example.fishingstop.feature.inspect.domain.usecase.ExtractTextFromImageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

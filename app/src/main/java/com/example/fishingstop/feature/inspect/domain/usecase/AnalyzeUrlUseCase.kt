@@ -1,14 +1,17 @@
-package com.example.fishingstop.feature.inspect.domain
+package com.example.fishingstop.feature.inspect.domain.usecase
 
 import com.example.fishingstop.core.util.InspectMethod
 import com.example.fishingstop.core.util.RiskLevel
+import com.example.fishingstop.feature.inspect.domain.repository.InspectionRepository
+import com.example.fishingstop.feature.inspect.domain.UrlRiskAnalyzer
+import com.example.fishingstop.feature.inspect.domain.repository.WhitelistRepository
 import com.example.fishingstop.feature.inspect.domain.model.RiskAnalysis
 import javax.inject.Inject
 
 /**
  * URL(링크/QR) 검사 유스케이스 — "휴리스틱 + Gemini 분석" 병합(기획 확정).
  *
- * 1) 로컬 휴리스틱([UrlRiskAnalyzer])으로 즉시 검사하고,
+ * 1) 로컬 휴리스틱([com.example.fishingstop.feature.inspect.domain.UrlRiskAnalyzer])으로 즉시 검사하고,
  * 2) Gemini 분석을 추가로 시도한 뒤 두 결과를 병합한다.
  *    (점수는 더 높은 쪽, 근거는 합집합 — 안전 판정 실수를 줄이는 보수적 병합)
  * 3) AI가 실패해도(네트워크 오류 등) 휴리스틱 결과만으로 진행한다 → 오프라인에서도 동작.

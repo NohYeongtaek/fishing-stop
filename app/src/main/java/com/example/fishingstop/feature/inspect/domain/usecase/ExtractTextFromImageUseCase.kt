@@ -1,6 +1,7 @@
-package com.example.fishingstop.feature.inspect.domain
+package com.example.fishingstop.feature.inspect.domain.usecase
 
 import android.net.Uri
+import com.example.fishingstop.feature.inspect.domain.repository.OcrRepository
 import javax.inject.Inject
 
 /**

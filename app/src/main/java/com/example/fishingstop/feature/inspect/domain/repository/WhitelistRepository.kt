@@ -1,4 +1,4 @@
-package com.example.fishingstop.feature.inspect.domain
+package com.example.fishingstop.feature.inspect.domain.repository
 
 /**
  * 안심 도메인(화이트리스트) 저장소.

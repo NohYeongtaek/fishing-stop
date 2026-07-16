@@ -1,5 +1,6 @@
-package com.example.fishingstop.feature.inspect.domain
+package com.example.fishingstop.feature.inspect.domain.usecase
 
+import com.example.fishingstop.feature.inspect.domain.repository.InspectionRepository
 import javax.inject.Inject
 
 /** 검사 기록 1건을 삭제하는 유스케이스. */

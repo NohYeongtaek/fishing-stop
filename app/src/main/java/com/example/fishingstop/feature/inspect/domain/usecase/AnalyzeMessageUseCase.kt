@@ -1,6 +1,7 @@
-package com.example.fishingstop.feature.inspect.domain
+package com.example.fishingstop.feature.inspect.domain.usecase
 
 import com.example.fishingstop.core.util.InspectMethod
+import com.example.fishingstop.feature.inspect.domain.repository.InspectionRepository
 import javax.inject.Inject
 
 /**

@@ -7,7 +7,7 @@ import com.example.fishingstop.core.util.IoDispatcher
 import com.example.fishingstop.feature.inspect.data.mapper.toDomain
 import com.example.fishingstop.feature.inspect.data.mapper.toRiskAnalysis
 import com.example.fishingstop.feature.inspect.data.remote.GeminiAnalysisDataSource
-import com.example.fishingstop.feature.inspect.domain.InspectionRepository
+import com.example.fishingstop.feature.inspect.domain.repository.InspectionRepository
 import com.example.fishingstop.feature.inspect.domain.model.InspectionResult
 import com.example.fishingstop.feature.inspect.domain.model.RiskAnalysis
 import kotlinx.coroutines.CoroutineDispatcher

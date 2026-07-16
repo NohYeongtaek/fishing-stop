@@ -1,7 +1,7 @@
 package com.example.fishingstop.feature.report.domain
 
 import com.example.fishingstop.core.util.Anonymizer
-import com.example.fishingstop.feature.inspect.domain.InspectionRepository
+import com.example.fishingstop.feature.inspect.domain.repository.InspectionRepository
 import com.example.fishingstop.feature.report.domain.model.Indicator
 import com.example.fishingstop.feature.report.domain.model.IndicatorSource
 import com.example.fishingstop.feature.report.domain.model.IndicatorType

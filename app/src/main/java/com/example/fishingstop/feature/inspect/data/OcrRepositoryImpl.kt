@@ -3,7 +3,7 @@ package com.example.fishingstop.feature.inspect.data
 import android.net.Uri
 import com.example.fishingstop.core.util.IoDispatcher
 import com.example.fishingstop.feature.inspect.data.ocr.MlKitOcrDataSource
-import com.example.fishingstop.feature.inspect.domain.OcrRepository
+import com.example.fishingstop.feature.inspect.domain.repository.OcrRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
