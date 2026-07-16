@@ -67,6 +67,8 @@ dependencies {
     implementation(libs.androidx.material3)
     // Icons.Filled.* 등 머티리얼 아이콘. material3의 전이 의존성에 기대지 않고 명시 선언(런타임 누락 방지).
     implementation("androidx.compose.material:material-icons-core")
+    // QrCode/Link/Image/Sms 등 core에 없는 아이콘(직접검사 4종)에 필요.
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.firebase.common)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

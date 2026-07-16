@@ -11,7 +11,8 @@ import androidx.compose.ui.unit.sp
  *
  * 폰트: 스펙은 Noto Sans KR. 지금은 [AppFontFamily] = FontFamily.Default (시스템 한글 글꼴)이며,
  * res/font 에 Noto Sans KR(Regular/Medium/Bold/Black)을 추가하면 아래 한 곳만 바꾸면 된다.
- * 크기는 sp(시스템 글꼴 배율 존중), 어르신 모드는 그 위에 얹는 앱 자체 확대다.
+ * 크기는 sp이지만, [FishingstopTheme]에서 fontScale을 1로 고정해 시스템 글꼴 배율의 영향은 받지 않는다.
+ * 어르신 모드는 그 위에 얹는 앱 자체 확대다.
  */
 val AppFontFamily: FontFamily = FontFamily.Default // TODO: Noto Sans KR 등록 시 교체
 
