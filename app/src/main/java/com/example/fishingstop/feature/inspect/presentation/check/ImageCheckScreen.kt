@@ -12,18 +12,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,7 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.fishingstop.core.ui.components.AppScaffold
+import com.example.fishingstop.core.ui.components.AppTextField
+import com.example.fishingstop.core.ui.components.AppTopBar
 import com.example.fishingstop.core.ui.components.PrimaryButton
+import com.example.fishingstop.core.ui.components.SecondaryButton
+import com.example.fishingstop.ui.theme.AppTheme
 
 /**
  * 이미지 검사 화면(FO_02_03).
@@ -42,7 +37,6 @@ import com.example.fishingstop.core.ui.components.PrimaryButton
  * 사용자가 확인·수정 → 검사. (기획 확정: 미리보기 단계 필수)
  * 이미지는 기기 밖으로 전송되지 않으며, 추출된 텍스트만 분석에 사용된다.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageCheckScreen(
     onSubmit: (String) -> Unit,
@@ -65,31 +59,23 @@ fun ImageCheckScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("이미지 검사") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로")
-                    }
-                }
-            )
-        }
+    AppScaffold(
+        topBar = { AppTopBar(title = "이미지 검사", onBack = onBack) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = AppTheme.spacing.screenX, vertical = AppTheme.spacing.cardPad),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.stackGap)
         ) {
             when (val s = state) {
                 is ImageCheckUiState.Idle, is ImageCheckUiState.Error -> {
                     Text(
                         "의심되는 카톡·문자 캡처 이미지를 올려주세요.",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = AppTheme.type.subtitle,
+                        color = AppTheme.colors.textSecondary
                     )
                     PrimaryButton(
                         text = "이미지 파일 업로드",
@@ -106,10 +92,11 @@ fun ImageCheckScreen(
                         modifier = Modifier.fillMaxWidth().padding(top = 48.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = AppTheme.colors.greenPrimary)
                         Text(
                             "이미지에서 글자를 읽고 있어요…",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = AppTheme.type.subtitle,
+                            color = AppTheme.colors.textPrimary,
                             modifier = Modifier.padding(top = 16.dp)
                         )
                     }
@@ -118,12 +105,13 @@ fun ImageCheckScreen(
                 is ImageCheckUiState.Preview -> {
                     Text(
                         "이미지에서 읽어낸 내용이에요. 잘못 읽힌 부분이 있으면 고친 뒤 검사해 주세요.",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = AppTheme.type.subtitle,
+                        color = AppTheme.colors.textSecondary
                     )
-                    OutlinedTextField(
+                    AppTextField(
                         value = s.text,
                         onValueChange = viewModel::updatePreviewText,
-                        label = { Text("추출된 텍스트") },
+                        label = "추출된 텍스트",
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 160.dp)
@@ -139,14 +127,14 @@ fun ImageCheckScreen(
                             }
                         }
                     )
-                    OutlinedButton(
+                    SecondaryButton(
+                        text = "다른 이미지 선택",
                         onClick = {
                             imagePicker.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("다른 이미지 선택") }
+                        }
+                    )
                 }
             }
         }

@@ -5,60 +5,43 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.fishingstop.core.ui.components.AppCard
+import com.example.fishingstop.core.ui.components.AppScaffold
+import com.example.fishingstop.core.ui.components.AppTopBar
+import com.example.fishingstop.ui.theme.AppTheme
 
 /**
  * 공지사항 화면(FO_05_01) — 월별 목록 + 아코디언(와이어프레임 확정).
  * 항목을 누르면 아래로 펼쳐지고, 다른 항목을 누르면 기존 항목은 닫힌다.
  * 이번 버전은 로컬 데이터이며, 서버 공지는 v2에서 연동한다.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoticeScreen(onBack: () -> Unit) {
     // 현재 펼쳐진 공지 id (하나만 펼침 — 아코디언)
     var expandedId by remember { mutableStateOf<String?>(null) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("공지사항") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로")
-                    }
-                }
-            )
-        }
+    AppScaffold(
+        topBar = { AppTopBar(title = "공지사항", onBack = onBack) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = AppTheme.spacing.screenX),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.listGap)
         ) {
             items(NOTICES, key = { it.id }) { notice ->
                 NoticeItem(
@@ -76,23 +59,17 @@ fun NoticeScreen(onBack: () -> Unit) {
 
 @Composable
 private fun NoticeItem(notice: Notice, expanded: Boolean, onClick: () -> Unit) {
-    Card(
+    val colors = AppTheme.colors
+    AppCard(
         modifier = Modifier
-            .fillMaxWidth()
             .clickable(onClick = onClick)
             .animateContentSize() // 펼침/닫힘 부드럽게
     ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(notice.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(
-                notice.date,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (expanded) {
-                HorizontalDivider(Modifier.padding(vertical = 10.dp))
-                Text(notice.body, style = MaterialTheme.typography.bodyMedium)
-            }
+        Text(notice.title, style = AppTheme.type.cardLabel, color = colors.textPrimary)
+        Text(notice.date, style = AppTheme.type.caption, color = colors.textTertiary)
+        if (expanded) {
+            HorizontalDivider(Modifier.padding(vertical = 10.dp), color = colors.borderDivider)
+            Text(notice.body, style = AppTheme.type.body, color = colors.textSecondary)
         }
     }
 }

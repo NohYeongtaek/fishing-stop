@@ -9,16 +9,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,7 +18,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.fishingstop.core.ui.components.AppScaffold
+import com.example.fishingstop.core.ui.components.AppTextField
+import com.example.fishingstop.core.ui.components.AppTopBar
 import com.example.fishingstop.core.ui.components.PrimaryButton
+import com.example.fishingstop.ui.theme.AppTheme
 
 /**
  * 문자 검사 화면(FO_02_04).
@@ -38,7 +33,6 @@ import com.example.fishingstop.core.ui.components.PrimaryButton
  * @param onSubmit 검사 실행(분석 화면으로 이동)
  * @param onBack   뒤로
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextCheckScreen(
     prefill: String?,
@@ -48,34 +42,26 @@ fun TextCheckScreen(
     val context = LocalContext.current
     var inputText by remember { mutableStateOf(prefill.orEmpty()) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("문자 검사") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로")
-                    }
-                }
-            )
-        }
+    AppScaffold(
+        topBar = { AppTopBar(title = "문자 검사", onBack = onBack) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = AppTheme.spacing.screenX, vertical = AppTheme.spacing.cardPad),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.stackGap)
         ) {
             Text(
                 "의심 가는 문자를 복사한 뒤 붙여넣어 주세요.",
-                style = MaterialTheme.typography.bodyLarge
+                style = AppTheme.type.subtitle,
+                color = AppTheme.colors.textSecondary
             )
-            OutlinedTextField(
+            AppTextField(
                 value = inputText,
                 onValueChange = { inputText = it },
-                label = { Text("문자 내용") },
+                label = "문자 내용",
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 160.dp)

@@ -18,16 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -42,7 +33,11 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.fishingstop.core.ui.components.AppScaffold
+import com.example.fishingstop.core.ui.components.AppTopBar
 import com.example.fishingstop.core.ui.components.PrimaryButton
+import com.example.fishingstop.core.ui.components.SecondaryButton
+import com.example.fishingstop.ui.theme.AppTheme
 import java.util.concurrent.Executors
 
 /**
@@ -56,7 +51,6 @@ import java.util.concurrent.Executors
  *
  * @param onDetected QR 값 인식 → 분석 화면으로 이동
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QrScanScreen(
     onDetected: (String) -> Unit,
@@ -81,25 +75,16 @@ fun QrScanScreen(
         if (!granted) denied = true
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("QR 코드 검사") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로")
-                    }
-                }
-            )
-        }
+    AppScaffold(
+        topBar = { AppTopBar(title = "QR 코드 검사", onBack = onBack) }
     ) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
             if (hasPermission) {
                 QrCameraPreview(onDetected = onDetected)
                 Text(
                     "QR코드를 화면 중앙에 맞춰 주세요",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = AppTheme.type.subtitle,
+                    color = androidx.compose.ui.graphics.Color.White,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(top = 24.dp)
@@ -108,13 +93,14 @@ fun QrScanScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp),
+                        .padding(AppTheme.spacing.screenX),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
                         "QR 검사를 하려면 카메라 권한이 필요해요.",
-                        style = MaterialTheme.typography.titleMedium
+                        style = AppTheme.type.subtitle,
+                        color = AppTheme.colors.textPrimary
                     )
                     PrimaryButton(
                         text = "카메라 권한 허용하기",
@@ -123,7 +109,8 @@ fun QrScanScreen(
                     )
                     if (denied) {
                         // "다시 묻지 않음" 거부 시 시스템 창이 뜨지 않으므로 설정으로 안내한다.
-                        OutlinedButton(
+                        SecondaryButton(
+                            text = "설정에서 권한 허용하기",
                             onClick = {
                                 val intent = Intent(
                                     Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
@@ -131,8 +118,8 @@ fun QrScanScreen(
                                 )
                                 runCatching { context.startActivity(intent) }
                             },
-                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                        ) { Text("설정에서 권한 허용하기") }
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
                 }
             }

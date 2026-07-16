@@ -1,8 +1,8 @@
 package com.example.fishingstop.feature.splash.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.fishingstop.ui.theme.AppTheme
 
 /**
  * 스플래시 화면.
@@ -46,13 +47,15 @@ fun SplashScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppTheme.colors.pageBg),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "피싱멈춰!",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary
+            style = AppTheme.type.h1,
+            color = AppTheme.colors.greenPrimary
         )
     }
 }
