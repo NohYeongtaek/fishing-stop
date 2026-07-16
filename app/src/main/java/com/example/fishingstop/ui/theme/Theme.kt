@@ -6,6 +6,8 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 
 /**
  * 앱 테마. (다크, 어르신) 조합에 맞춰 커스텀 디자인 토큰(AppColors/Type/Shapes/Sizes/Spacing)을
@@ -67,7 +69,15 @@ fun FishingstopTheme(
         )
     }
 
+    // 버튼·카드 등 크기 토큰(AppSizes)은 dp로 고정돼 있어, 시스템 글꼴 배율을 그대로 따르면
+    // 글자가 넘치거나 레이아웃이 깨질 수 있다. fontScale을 1로 고정해 시스템 설정과 무관하게 만든다.
+    val fixedFontScaleDensity = Density(
+        density = LocalDensity.current.density,
+        fontScale = 1f
+    )
+
     CompositionLocalProvider(
+        LocalDensity provides fixedFontScaleDensity,
         LocalAppColors provides colors,
         LocalAppType provides type,
         LocalAppShapes provides shapes,

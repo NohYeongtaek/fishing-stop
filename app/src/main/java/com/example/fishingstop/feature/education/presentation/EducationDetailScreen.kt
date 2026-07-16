@@ -57,7 +57,7 @@ fun EducationDetailScreen(
                 Text("이런 신호를 의심하세요", style = AppTheme.type.cardLabel, color = colors.warnText)
                 category.warningSigns.forEach { line ->
                     Row(Modifier.padding(top = 6.dp)) {
-                        Text("⚠️ ", style = AppTheme.type.body)
+                        Text("• ", style = AppTheme.type.body, color = colors.warnText)
                         Text(line, style = AppTheme.type.body, color = colors.warnText)
                     }
                 }
@@ -68,7 +68,7 @@ fun EducationDetailScreen(
                 Text("이렇게 대처하세요", style = AppTheme.type.cardLabel, color = colors.textPrimary)
                 category.tips.forEach { line ->
                     Row(Modifier.padding(top = 6.dp)) {
-                        Text("✅ ", style = AppTheme.type.body)
+                        Text("• ", style = AppTheme.type.body)
                         Text(line, style = AppTheme.type.body, color = colors.textPrimary)
                     }
                 }
