@@ -215,30 +215,33 @@ private fun InputTextCard(inputText: String) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val colors = AppTheme.colors
 
-    Box(Modifier.animateContentSize()) {
-        AppCard {
-            Text(
-                text = "검사한 내용",
-                style = AppTheme.type.cardLabel,
-                color = colors.textSecondary
-            )
-            Text(
-                text = inputText.ifBlank { "(내용 없음)" },
-                style = AppTheme.type.body,
-                color = colors.textPrimary,
-                maxLines = if (expanded) Int.MAX_VALUE else 5,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-            // 짧은 텍스트에는 버튼을 굳이 보여주지 않는다(대략 5줄 이상일 때만).
-            if (inputText.length > 120 || inputText.lineSequence().count() > 5) {
-                TextButton(onClick = { expanded = !expanded }) {
-                    Text(
-                        if (expanded) "접기" else "더보기",
-                        style = AppTheme.type.button.copy(fontWeight = FontWeight.Medium),
-                        color = colors.greenPrimary
-                    )
-                }
+    AppCard {
+        Text(
+            text = "검사한 내용",
+            style = AppTheme.type.cardLabel,
+            color = colors.textSecondary
+        )
+        // animateContentSize는 내부적으로 clipToBounds()를 적용한다. 카드 전체를 감싸면
+        // AppCard의 그림자(elevation)까지 잘려 다른 카드와 다르게 보이므로, 크기가
+        // 실제로 바뀌는 이 텍스트에만 걸어 카드 그림자는 그대로 둔다.
+        Text(
+            text = inputText.ifBlank { "(내용 없음)" },
+            style = AppTheme.type.body,
+            color = colors.textPrimary,
+            maxLines = if (expanded) Int.MAX_VALUE else 5,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .animateContentSize()
+        )
+        // 짧은 텍스트에는 버튼을 굳이 보여주지 않는다(대략 5줄 이상일 때만).
+        if (inputText.length > 120 || inputText.lineSequence().count() > 5) {
+            TextButton(onClick = { expanded = !expanded }) {
+                Text(
+                    if (expanded) "접기" else "더보기",
+                    style = AppTheme.type.button.copy(fontWeight = FontWeight.Medium),
+                    color = colors.greenPrimary
+                )
             }
         }
     }

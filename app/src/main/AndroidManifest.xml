@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- 직접검사 탭의 QR 코드 촬영용. READ_SMS/화면캡처 권한은 사용하지 않음(정책상 제외). -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- FCM 공지사항 알림 표시용(API 33+에서는 런타임 동의 필요) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <!-- 카메라가 없는 기기에서도 설치 가능하도록 required=false -->
     <uses-feature android:name="android.hardware.camera.any" android:required="false"/>
@@ -45,6 +47,23 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
+
+        <!-- 로그인이 없어 기기별 토큰을 저장하지 않고, 토픽 구독(전체 공지)만으로 알림을 받는다. -->
+        <service
+            android:name=".core.fcm.FishingStopFcmService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- notification 페이로드에 채널 지정이 없을 때 사용할 기본 채널(콘솔에서 간단히 보낼 때 대비). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/fcm_notice_channel_id" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_notify" />
     </application>
 
 </manifest>
