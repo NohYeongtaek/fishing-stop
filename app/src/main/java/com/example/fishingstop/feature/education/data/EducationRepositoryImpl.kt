@@ -8,7 +8,7 @@ import javax.inject.Inject
  * 앱 내장 정적 예방 교육 콘텐츠.
  * 오프라인에서도 열람 가능하도록 코드에 내장한다. 추후 서버/원격 콘텐츠로 확장할 수 있다.
  */
-class EducationRepositoryImpl @Inject constructor() : EducationRepository {
+class  EducationRepositoryImpl @Inject constructor() : EducationRepository {
 
     private val categories: List<EducationCategory> = listOf(
         EducationCategory(

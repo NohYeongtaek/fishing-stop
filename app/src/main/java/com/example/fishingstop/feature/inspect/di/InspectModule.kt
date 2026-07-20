@@ -3,8 +3,10 @@ package com.example.fishingstop.feature.inspect.di
 import com.example.fishingstop.feature.inspect.data.InspectionRepositoryImpl
 import com.example.fishingstop.feature.inspect.data.OcrRepositoryImpl
 import com.example.fishingstop.feature.inspect.data.WhitelistRepositoryImpl
+import com.example.fishingstop.feature.inspect.data.remote.UrlRedirectResolverImpl
 import com.example.fishingstop.feature.inspect.domain.repository.InspectionRepository
 import com.example.fishingstop.feature.inspect.domain.repository.OcrRepository
+import com.example.fishingstop.feature.inspect.domain.repository.UrlRedirectResolver
 import com.example.fishingstop.feature.inspect.domain.repository.WhitelistRepository
 import com.google.firebase.Firebase
 import com.google.firebase.ai.GenerativeModel
@@ -45,6 +47,10 @@ abstract class InspectModule {
     @Binds
     @Singleton
     abstract fun bindWhitelistRepository(impl: WhitelistRepositoryImpl): WhitelistRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUrlRedirectResolver(impl: UrlRedirectResolverImpl): UrlRedirectResolver
 
     companion object {
 

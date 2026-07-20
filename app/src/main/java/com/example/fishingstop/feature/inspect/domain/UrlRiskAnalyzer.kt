@@ -49,6 +49,28 @@ class UrlRiskAnalyzer @Inject constructor() {
         )
     }
 
+    /**
+     * 메시지에서 가장 위험한(대표) URL 원문을 뽑는다. 리다이렉트 추적 대상 선정에 사용한다.
+     * @return 대표 URL. 링크가 없으면 null.
+     */
+    fun findWorstUrl(text: String, safeDomains: Set<String> = emptySet()): String? =
+        extractUrls(text).maxByOrNull { scoreUrl(it, safeDomains).score }
+
+    /** 주어진 URL이 단축 URL 서비스(목적지 은닉)인지 여부. */
+    fun isShortener(url: String): Boolean {
+        val normalized = if (url.contains("://")) url else "http://$url"
+        val host = runCatching { URI(normalized).host?.lowercase() }.getOrNull() ?: return false
+        return SHORTENERS.any { host == it || host.endsWith(".$it") }
+    }
+
+    /** 리다이렉트 추적으로 알아낸 실제 목적지 호스트를 단독으로 채점한다. */
+    fun analyzeResolvedHost(host: String, safeDomains: Set<String> = emptySet()): RiskAnalysis {
+        val result = scoreUrl(host, safeDomains)
+        val level = RiskLevel.fromScore(result.score)
+        val signals = result.signals.ifEmpty { listOf("실제 목적지에서 특별한 위험 신호는 발견되지 않았습니다.") }
+        return RiskAnalysis(result.score, level, signals.take(5), adviceFor(level))
+    }
+
     // ── 한 URL에 대한 점수/근거 ──
     private data class UrlScore(val score: Int, val signals: List<String>)
 
