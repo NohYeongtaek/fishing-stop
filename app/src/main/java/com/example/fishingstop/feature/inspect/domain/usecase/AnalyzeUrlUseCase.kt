@@ -4,23 +4,26 @@ import com.example.fishingstop.core.util.InspectMethod
 import com.example.fishingstop.core.util.RiskLevel
 import com.example.fishingstop.feature.inspect.domain.repository.InspectionRepository
 import com.example.fishingstop.feature.inspect.domain.UrlRiskAnalyzer
+import com.example.fishingstop.feature.inspect.domain.repository.UrlRedirectResolver
 import com.example.fishingstop.feature.inspect.domain.repository.WhitelistRepository
 import com.example.fishingstop.feature.inspect.domain.model.RiskAnalysis
 import javax.inject.Inject
 
 /**
- * URL(링크/QR) 검사 유스케이스 — "휴리스틱 + Gemini 분석" 병합(기획 확정).
+ * URL(링크/QR) 검사 유스케이스 — "휴리스틱(+리다이렉트 추적) + Gemini 분석" 병합(기획 확정).
  *
  * 1) 로컬 휴리스틱([com.example.fishingstop.feature.inspect.domain.UrlRiskAnalyzer])으로 즉시 검사하고,
- * 2) Gemini 분석을 추가로 시도한 뒤 두 결과를 병합한다.
+ * 2) 대표 URL이 단축 URL이면 실제 목적지를 리다이렉트로 추적해 재채점한 뒤 병합하고,
+ * 3) Gemini 분석을 추가로 시도한 뒤 두 결과를 병합한다.
  *    (점수는 더 높은 쪽, 근거는 합집합 — 안전 판정 실수를 줄이는 보수적 병합)
- * 3) AI가 실패해도(네트워크 오류 등) 휴리스틱 결과만으로 진행한다 → 오프라인에서도 동작.
+ * 4) 리다이렉트 추적/AI가 실패해도(네트워크 오류 등) 나머지 결과만으로 진행한다 → 오프라인에서도 동작.
  *
  * @return 성공 시 저장된 검사 기록 id
  */
 class AnalyzeUrlUseCase @Inject constructor(
     private val repository: InspectionRepository,
     private val urlRiskAnalyzer: UrlRiskAnalyzer,
+    private val urlRedirectResolver: UrlRedirectResolver,
     private val whitelistRepository: WhitelistRepository
 ) {
     suspend operator fun invoke(
@@ -31,12 +34,42 @@ class AnalyzeUrlUseCase @Inject constructor(
 
         // 안심 도메인(화이트리스트)을 반영해 휴리스틱 검사
         val safeDomains = whitelistRepository.getSafeDomains()
-        val heuristic = urlRiskAnalyzer.analyze(input, safeDomains)
+        var heuristic = urlRiskAnalyzer.analyze(input, safeDomains)
+
+        // 대표 URL이 단축 URL이면 실제 목적지를 추적해 재채점 후 병합한다.
+        // (실패해도 검사 자체는 계속된다 — 오프라인/네트워크 오류 대응)
+        val worstUrl = urlRiskAnalyzer.findWorstUrl(input, safeDomains)
+        if (worstUrl != null && urlRiskAnalyzer.isShortener(worstUrl)) {
+            val resolvedHost = runCatching { urlRedirectResolver.resolveFinalHost(worstUrl) }
+                .getOrNull()
+            if (resolvedHost != null) {
+                val resolved = urlRiskAnalyzer.analyzeResolvedHost(resolvedHost, safeDomains)
+                heuristic = mergeResolved(heuristic, resolved, resolvedHost)
+            }
+        }
+
         // AI 분석은 보조 신호: 실패해도 검사 자체는 계속된다(오프라인 지원).
         val ai = runCatching { repository.analyze(input) }.getOrNull()
 
         val merged = merge(heuristic, ai)
         repository.save(text = input, method = method, analysis = merged)
+    }
+
+    /** 원본 휴리스틱 결과에 "실제 목적지" 채점 결과를 보수적으로(더 위험한 쪽 기준) 합친다. */
+    private fun mergeResolved(
+        heuristic: RiskAnalysis,
+        resolved: RiskAnalysis,
+        resolvedHost: String
+    ): RiskAnalysis {
+        val score = maxOf(heuristic.riskScore, resolved.riskScore)
+        val riskier = if (resolved.riskScore > heuristic.riskScore) resolved else heuristic
+        return RiskAnalysis(
+            riskScore = score,
+            riskLevel = RiskLevel.fromScore(score),
+            signals = (listOf("실제 목적지: $resolvedHost") + heuristic.signals + resolved.signals)
+                .distinct().take(5),
+            advice = riskier.advice.ifBlank { heuristic.advice }
+        )
     }
 
     /** 휴리스틱과 AI 결과를 보수적으로(더 위험한 쪽 기준) 병합한다. */
