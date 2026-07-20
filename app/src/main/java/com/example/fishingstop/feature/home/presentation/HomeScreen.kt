@@ -1,7 +1,12 @@
 package com.example.fishingstop.feature.home.presentation
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.StartOffset
 import androidx.compose.animation.core.animateFloat
@@ -28,6 +33,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -40,6 +46,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.example.fishingstop.core.ui.components.AppBottomBar
 import com.example.fishingstop.core.ui.components.AppScaffold
 import com.example.fishingstop.core.ui.components.BottomBarItem
@@ -78,6 +85,21 @@ fun HomeScreen(
     // rememberSaveable: 상세 화면에 갔다가 "뒤로"로 돌아와도 보던 탭이 유지되도록
     // 백스택 저장 상태에 함께 보존한다(remember 는 백스택 이탈 시 초기화됨).
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+
+    // 공지사항 FCM 알림을 보여주려면 API 33+에서 런타임 권한이 필요하다.
+    // 온보딩을 마치고 처음 홈에 들어왔을 때 한 번 요청한다(이후 거부/허용은 시스템이 알아서 처리).
+    val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) {}
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     AppScaffold(
         bottomBar = {
