@@ -42,13 +42,13 @@ import com.example.fishingstop.ui.theme.AppTheme
  *
  * @param onOpenNotice  공지사항 화면으로 이동
  * @param onOpenPrivacy 개인정보 처리방침 화면으로 이동
- * @param onOpenNoticeWrite 관리자 PIN 통과 시 공지 작성 화면으로 이동
+ * @param onOpenAdmin 관리자 PIN 통과 시 관리자 화면으로 이동
  */
 @Composable
 fun SettingsScreen(
     onOpenNotice: () -> Unit,
     onOpenPrivacy: () -> Unit,
-    onOpenNoticeWrite: () -> Unit,
+    onOpenAdmin: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val themeMode by viewModel.themeMode.collectAsState()
@@ -65,7 +65,7 @@ fun SettingsScreen(
             onSuccess = {
                 showPinDialog = false
                 versionTapCount = 0
-                onOpenNoticeWrite()
+                onOpenAdmin()
             },
             onDismiss = {
                 showPinDialog = false

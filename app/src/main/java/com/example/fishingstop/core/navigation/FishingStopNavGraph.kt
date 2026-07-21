@@ -20,7 +20,9 @@ import com.example.fishingstop.feature.inspect.presentation.qr.QrScanScreen
 import com.example.fishingstop.feature.inspect.presentation.result.InspectResultScreen
 import com.example.fishingstop.feature.onboarding.presentation.OnboardingScreen
 import com.example.fishingstop.feature.privacy.presentation.PrivacyPolicyScreen
+import com.example.fishingstop.feature.notice.presentation.AdminHomeScreen
 import com.example.fishingstop.feature.notice.presentation.NoticeListScreen
+import com.example.fishingstop.feature.notice.presentation.NoticeManageScreen
 import com.example.fishingstop.feature.notice.presentation.NoticeWriteScreen
 import com.example.fishingstop.feature.report.presentation.ReportScreen
 import com.example.fishingstop.feature.splash.presentation.SplashScreen
@@ -127,7 +129,7 @@ fun FishingStopNavGraph(
                 onOpenEducation = { categoryId -> navController.navigate(Routes.EducationDetail(categoryId)) },
                 onOpenNotice = { navController.navigate(Routes.NoticeList) },
                 onOpenPrivacy = { navController.navigate(Routes.PrivacyPolicy) },
-                onOpenNoticeWrite = { navController.navigate(Routes.NoticeWrite) }
+                onOpenAdmin = { navController.navigate(Routes.AdminHome) }
             )
         }
 
@@ -216,7 +218,24 @@ fun FishingStopNavGraph(
             NoticeListScreen(onBack = { navController.popBackStack() })
         }
 
-        // 공지 작성(관리자 PIN 게이트 통과 후 진입) → 등록 성공 시 뒤로
+        // 관리자 화면(PIN 게이트 통과 후 진입): 공지 작성 / 공지 관리로 분기
+        composable<Routes.AdminHome> {
+            AdminHomeScreen(
+                onWrite = { navController.navigate(Routes.NoticeWrite()) },
+                onManage = { navController.navigate(Routes.NoticeManage) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // 공지 관리(관리자): 목록 상세에서 수정·삭제. 삭제는 즉시, 수정 복귀는 ON_RESUME로 자동 새로고침
+        composable<Routes.NoticeManage> {
+            NoticeManageScreen(
+                onEdit = { id -> navController.navigate(Routes.NoticeWrite(noticeId = id)) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // 공지 작성/수정(관리자). noticeId 유무로 작성/수정 분기 → 저장 성공 시 뒤로
         composable<Routes.NoticeWrite> {
             NoticeWriteScreen(
                 onDone = { navController.popBackStack() },
