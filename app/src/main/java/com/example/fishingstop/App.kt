@@ -1,16 +1,26 @@
 package com.example.fishingstop
 
 import android.app.Application
+import android.util.Log
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import com.example.fishingstop.core.fcm.FishingStopFcmService
 import com.example.fishingstop.core.managers.CoilManager
-import com.google.firebase.messaging.FirebaseMessaging
+import com.example.fishingstop.core.utils.Constants.TAG
+import com.example.fishingstop.feature.settings.domain.SettingsRepository
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltAndroidApp
 class App : Application(), SingletonImageLoader.Factory {
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
     companion object {
         private var _instance: App? = null
         val instance: App get() = _instance ?: throw IllegalArgumentException("App이 없습니다.")
@@ -23,9 +33,17 @@ class App : Application(), SingletonImageLoader.Factory {
         super.onCreate()
         _instance = this
 
-        // 로그인이 없어 기기별 토큰을 저장할 곳이 없으므로, 전체 공지 토픽 구독 방식을 쓴다.
         FishingStopFcmService.ensureNotificationChannel(this)
-        FirebaseMessaging.getInstance().subscribeToTopic(FishingStopFcmService.NOTICE_TOPIC)
+
+        // 로그인이 없어 기기별 토큰을 저장할 곳이 없으므로, 전체 공지 토픽 구독 방식을 쓴다.
+        // 사용자가 설정에서 알림을 꺼둔 상태라면 재구독하지 않는다.
+        CoroutineScope(Dispatchers.Default).launch {
+            val enabled = settingsRepository.notificationEnabled.first()
+            Log.d(TAG, "onCreate: 저장된 알림 설정 = $enabled")
+            if (enabled) {
+                FishingStopFcmService.subscribeNotice()
+            }
+        }
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {
