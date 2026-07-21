@@ -2,6 +2,7 @@ package com.example.fishingstop.feature.notice.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,14 +11,13 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -29,10 +29,11 @@ import com.example.fishingstop.core.ui.components.PrimaryButton
 import com.example.fishingstop.ui.theme.AppTheme
 
 /**
- * 공지 작성 화면(관리자 전용). 설정의 숨은 PIN 게이트를 통과해야 진입한다.
- * 제목/본문 입력 → Firestore 등록 → 성공 시 목록으로 복귀.
+ * 공지 작성/수정 화면(관리자 전용).
+ * noticeId 유무에 따라 "공지 작성"/"공지 수정"으로 동작한다(제목·버튼 문구가 바뀜).
+ * 저장 성공 시 목록으로 복귀한다.
  *
- * @param onDone 등록 성공 후 돌아가기
+ * @param onDone 저장 성공 후 돌아가기(호출측에서 목록 새로고침을 트리거)
  * @param onBack 취소/뒤로
  */
 @Composable
@@ -42,29 +43,33 @@ fun NoticeWriteScreen(
     viewModel: NoticeWriteViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.state.collectAsState()
     val colors = AppTheme.colors
+    val isEdit = state.isEdit
 
-    var title by remember { mutableStateOf("") }
-    var body by remember { mutableStateOf("") }
-
-    LaunchedEffect(state) {
-        when (val s = state) {
-            is NoticeWriteUiState.Done -> {
-                Toast.makeText(context, "공지가 등록되었어요.", Toast.LENGTH_SHORT).show()
-                onDone()
-            }
-            is NoticeWriteUiState.Error -> {
-                Toast.makeText(context, s.message, Toast.LENGTH_LONG).show()
-                viewModel.consumeError()
-            }
-            else -> Unit
+    LaunchedEffect(state.done) {
+        if (state.done) {
+            Toast.makeText(context, if (isEdit) "공지가 수정되었어요." else "공지가 등록되었어요.", Toast.LENGTH_SHORT).show()
+            onDone()
+        }
+    }
+    LaunchedEffect(state.error) {
+        state.error?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.consumeError()
         }
     }
 
     AppScaffold(
-        topBar = { AppTopBar(title = "공지 작성", onBack = onBack) }
+        topBar = { AppTopBar(title = if (isEdit) "공지 수정" else "공지 작성", onBack = onBack) }
     ) { innerPadding ->
+        if (state.loading) {
+            Box(Modifier.fillMaxSize().padding(innerPadding), Alignment.Center) {
+                CircularProgressIndicator(color = colors.greenPrimary)
+            }
+            return@AppScaffold
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -75,35 +80,35 @@ fun NoticeWriteScreen(
             verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.stackGap)
         ) {
             Text(
-                "새 공지를 작성합니다. 등록하면 모든 사용자에게 노출됩니다.",
+                if (isEdit) "공지를 수정합니다. 저장하면 변경 내용이 모든 사용자에게 반영됩니다."
+                else "새 공지를 작성합니다. 등록하면 모든 사용자에게 노출됩니다.",
                 style = AppTheme.type.subtitle,
                 color = colors.textSecondary
             )
             AppTextField(
-                value = title,
-                onValueChange = { title = it },
+                value = state.title,
+                onValueChange = viewModel::onTitleChange,
                 label = "제목",
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             AppTextField(
-                value = body,
-                onValueChange = { body = it },
+                value = state.body,
+                onValueChange = viewModel::onBodyChange,
                 label = "내용",
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 200.dp)
             )
             PrimaryButton(
-                text = if (state is NoticeWriteUiState.Submitting) "등록 중…" else "등록하기",
-                enabled = state !is NoticeWriteUiState.Submitting,
-                onClick = {
-                    if (title.isBlank() || body.isBlank()) {
-                        Toast.makeText(context, "제목과 내용을 입력해 주세요.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        viewModel.submit(title, body)
-                    }
-                }
+                text = when {
+                    state.submitting && isEdit -> "수정 중…"
+                    state.submitting -> "등록 중…"
+                    isEdit -> "공지 수정하기"
+                    else -> "공지 작성하기"
+                },
+                enabled = !state.submitting,
+                onClick = viewModel::submit
             )
         }
     }

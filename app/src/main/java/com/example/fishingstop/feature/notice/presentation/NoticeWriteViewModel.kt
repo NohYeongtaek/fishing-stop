@@ -1,42 +1,97 @@
 package com.example.fishingstop.feature.notice.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.example.fishingstop.core.navigation.Routes
 import com.example.fishingstop.feature.notice.domain.NoticeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/** 공지 작성 상태. */
-sealed interface NoticeWriteUiState {
-    data object Idle : NoticeWriteUiState
-    data object Submitting : NoticeWriteUiState
-    data object Done : NoticeWriteUiState
-    data class Error(val message: String) : NoticeWriteUiState
-}
+/**
+ * 공지 작성/수정 폼 상태.
+ *
+ * @param loading 수정 모드에서 기존 공지를 불러오는 중
+ * @param isEdit  수정 모드 여부(제목/버튼 문구 분기)
+ * @param done    저장 성공(화면이 감지해 목록으로 복귀)
+ */
+data class NoticeWriteState(
+    val loading: Boolean = false,
+    val isEdit: Boolean = false,
+    val title: String = "",
+    val body: String = "",
+    val submitting: Boolean = false,
+    val done: Boolean = false,
+    val error: String? = null
+)
 
+/**
+ * 공지 작성/수정 ViewModel.
+ * 라우트의 noticeId 가 있으면 수정 모드(기존 내용 프리필 → update), 없으면 작성 모드(add).
+ */
 @HiltViewModel
 class NoticeWriteViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val repository: NoticeRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<NoticeWriteUiState>(NoticeWriteUiState.Idle)
-    val uiState: StateFlow<NoticeWriteUiState> = _uiState.asStateFlow()
+    private val noticeId: String? = savedStateHandle.toRoute<Routes.NoticeWrite>().noticeId
 
-    fun submit(title: String, body: String) {
-        if (_uiState.value is NoticeWriteUiState.Submitting) return
-        _uiState.value = NoticeWriteUiState.Submitting
+    private val _state = MutableStateFlow(
+        NoticeWriteState(loading = noticeId != null, isEdit = noticeId != null)
+    )
+    val state: StateFlow<NoticeWriteState> = _state.asStateFlow()
+
+    init {
+        if (noticeId != null) load(noticeId)
+    }
+
+    private fun load(id: String) {
         viewModelScope.launch {
-            runCatching { repository.addNotice(title.trim(), body.trim()) }
-                .onSuccess { _uiState.value = NoticeWriteUiState.Done }
-                .onFailure { _uiState.value = NoticeWriteUiState.Error(it.message ?: "등록에 실패했어요.") }
+            runCatching { repository.getNotice(id) }
+                .onSuccess { notice ->
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            title = notice?.title.orEmpty(),
+                            body = notice?.body.orEmpty()
+                        )
+                    }
+                }
+                .onFailure { e ->
+                    _state.update { it.copy(loading = false, error = e.message ?: "공지를 불러오지 못했어요.") }
+                }
         }
     }
 
-    fun consumeError() {
-        if (_uiState.value is NoticeWriteUiState.Error) _uiState.value = NoticeWriteUiState.Idle
+    fun onTitleChange(value: String) = _state.update { it.copy(title = value) }
+    fun onBodyChange(value: String) = _state.update { it.copy(body = value) }
+
+    fun submit() {
+        val current = _state.value
+        if (current.submitting) return
+        if (current.title.isBlank() || current.body.isBlank()) {
+            _state.update { it.copy(error = "제목과 내용을 입력해 주세요.") }
+            return
+        }
+        _state.update { it.copy(submitting = true) }
+        viewModelScope.launch {
+            val title = current.title.trim()
+            val body = current.body.trim()
+            runCatching {
+                if (noticeId != null) repository.updateNotice(noticeId, title, body)
+                else repository.addNotice(title, body)
+            }
+                .onSuccess { _state.update { it.copy(submitting = false, done = true) } }
+                .onFailure { e -> _state.update { it.copy(submitting = false, error = e.message ?: "저장에 실패했어요.") } }
+        }
     }
+
+    fun consumeError() = _state.update { it.copy(error = null) }
 }

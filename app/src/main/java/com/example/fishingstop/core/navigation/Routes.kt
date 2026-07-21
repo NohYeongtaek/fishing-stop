@@ -87,7 +87,18 @@ sealed interface Routes {
     @Serializable
     data object NoticeList : Routes
 
-    /** 공지 작성(관리자 전용): 설정의 숨은 PIN 게이트를 통과해야 진입 */
+    /** 관리자 화면: 숨은 PIN 게이트 통과 후 진입. 공지 작성/관리로 분기 */
     @Serializable
-    data object NoticeWrite : Routes
+    data object AdminHome : Routes
+
+    /** 공지 관리(관리자): 목록 + 상세에서 수정·삭제 */
+    @Serializable
+    data object NoticeManage : Routes
+
+    /**
+     * 공지 작성/수정(관리자 전용).
+     * @param noticeId null이면 새 공지 작성, 값이 있으면 해당 공지 수정
+     */
+    @Serializable
+    data class NoticeWrite(val noticeId: String? = null) : Routes
 }

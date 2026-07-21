@@ -79,7 +79,7 @@ fun HomeScreen(
     onOpenEducation: (String) -> Unit,
     onOpenNotice: () -> Unit,
     onOpenPrivacy: () -> Unit,
-    onOpenNoticeWrite: () -> Unit
+    onOpenAdmin: () -> Unit
 ) {
     // 선택된 하단 탭. (0:홈, 1:직접검사, 2:검사기록, 3:피싱예방, 4:설정)
     // rememberSaveable: 상세 화면에 갔다가 "뒤로"로 돌아와도 보던 탭이 유지되도록
@@ -126,7 +126,7 @@ fun HomeScreen(
                 HomeTab.SETTINGS -> SettingsScreen(
                     onOpenNotice = onOpenNotice,
                     onOpenPrivacy = onOpenPrivacy,
-                    onOpenNoticeWrite = onOpenNoticeWrite
+                    onOpenAdmin = onOpenAdmin
                 )
             }
         }

@@ -67,6 +67,56 @@ class NoticeRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun getNotice(id: String): Notice? = withContext(ioDispatcher) {
+        withTimeoutOrNull(TIMEOUT_MS) {
+            suspendCancellableCoroutine { cont ->
+                firestore.collection(COLLECTION).document(id)
+                    .get()
+                    .addOnSuccessListener { doc ->
+                        val notice = if (doc.exists()) Notice(
+                            id = doc.id,
+                            title = doc.getString(FIELD_TITLE).orEmpty(),
+                            body = doc.getString(FIELD_BODY).orEmpty(),
+                            createdAtMillis = doc.getTimestamp(FIELD_CREATED_AT)?.toDate()?.time ?: 0L
+                        ) else null
+                        cont.resume(notice)
+                    }
+                    .addOnFailureListener { e -> cont.resumeWithException(e) }
+            }
+        } ?: throw IllegalStateException(
+            "공지를 불러오지 못했어요. 네트워크 상태를 확인한 뒤 다시 시도해 주세요."
+        )
+    }
+
+    override suspend fun updateNotice(id: String, title: String, body: String): Unit =
+        withContext(ioDispatcher) {
+            // createdAt 은 건드리지 않고 제목/본문만 갱신한다.
+            val data = mapOf(FIELD_TITLE to title, FIELD_BODY to body)
+            withTimeoutOrNull(TIMEOUT_MS) {
+                suspendCancellableCoroutine { cont ->
+                    firestore.collection(COLLECTION).document(id)
+                        .update(data)
+                        .addOnSuccessListener { cont.resume(Unit) }
+                        .addOnFailureListener { e -> cont.resumeWithException(e) }
+                }
+            } ?: throw IllegalStateException(
+                "공지 수정이 지연되고 있어요. 네트워크 상태를 확인한 뒤 다시 시도해 주세요."
+            )
+        }
+
+    override suspend fun deleteNotice(id: String): Unit = withContext(ioDispatcher) {
+        withTimeoutOrNull(TIMEOUT_MS) {
+            suspendCancellableCoroutine { cont ->
+                firestore.collection(COLLECTION).document(id)
+                    .delete()
+                    .addOnSuccessListener { cont.resume(Unit) }
+                    .addOnFailureListener { e -> cont.resumeWithException(e) }
+            }
+        } ?: throw IllegalStateException(
+            "공지 삭제가 지연되고 있어요. 네트워크 상태를 확인한 뒤 다시 시도해 주세요."
+        )
+    }
+
     companion object {
         private const val COLLECTION = "notices"
         private const val FIELD_TITLE = "title"
