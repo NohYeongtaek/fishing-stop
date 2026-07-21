@@ -30,4 +30,14 @@ object Anonymizer {
         result = LONG_DIGITS.replace(result, "[숫자]")
         return result
     }
+
+    /**
+     * AI 분석으로 **전송하기 전** 적용하는 선별 마스킹.
+     *
+     * 전면 마스킹(mask)은 전화번호·계좌 같은 값을 지워 피싱 탐지 신호까지 없애 정확도를 떨어뜨린다.
+     * 반면 주민등록번호는 탐지에 전혀 필요 없으면서(있다는 사실만 신호가 됨) 가장 민감하므로,
+     * 여기서는 **주민번호만** 라벨로 치환해 최소 전송 원칙과 탐지 정확도를 함께 지킨다.
+     * (전화·계좌·이메일은 스미싱 판별의 근거가 될 수 있어 남긴다.)
+     */
+    fun maskForAi(text: String): String = RRN.replace(text, "[주민번호]")
 }
