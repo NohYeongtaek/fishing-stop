@@ -39,4 +39,20 @@ class AnonymizerTest {
         val text = "오늘 오후에 만나요"
         assertTrue(Anonymizer.mask(text) == text)
     }
+
+    @Test
+    fun `maskForAi는 주민번호만 마스킹한다`() {
+        val masked = Anonymizer.maskForAi("주민번호 900101-1234567 입니다")
+        assertFalse(masked.contains("1234567"))
+        assertTrue(masked.contains("[주민번호]"))
+    }
+
+    @Test
+    fun `maskForAi는 탐지 신호가 되는 전화번호와 계좌를 남긴다`() {
+        // 전면 마스킹과 달리, AI 전송용은 피싱 판별 근거가 되는 전화·계좌는 보존한다.
+        val text = "010-1234-5678 로 연락, 입금계좌 110-234-567890"
+        val masked = Anonymizer.maskForAi(text)
+        assertTrue(masked.contains("010-1234-5678"))
+        assertTrue(masked.contains("110-234-567890"))
+    }
 }

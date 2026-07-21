@@ -46,6 +46,9 @@ android {
     }
     buildFeatures {
         compose = true
+        // BuildConfig.DEBUG로 디버그/릴리스 App Check 프로바이더를 분기하기 위해 필요
+        // (AGP 8+부터 기본 비활성).
+        buildConfig = true
     }
 }
 
@@ -82,9 +85,12 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
 
     // Firebase AI 기능을 사용하기 위한 라이브러리를 추가합니다.
-    // App Check(디버그용) 라이브러리를 함께 추가합니다.
+    // App Check: 디버그 빌드는 Debug 프로바이더, 릴리스 빌드는 Play Integrity 프로바이더를 쓴다
+    // (MainActivity에서 BuildConfig.DEBUG로 분기). 디버그 프로바이더를 릴리스에 그대로 쓰면
+    // 실질적인 앱 무결성 검증 없이 API가 열려 있어 쿼터/키 도용에 노출된다.
     implementation("com.google.firebase:firebase-ai")
     implementation("com.google.firebase:firebase-appcheck-debug")
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
 
     // BoM을 사용하므로 Firebase 라이브러리에는
     // 버전을 따로 작성하지 않아도 됩니다.
