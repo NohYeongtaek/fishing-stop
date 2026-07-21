@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">fishingstop</string>
+    <string name="app_name">피싱멈춰!</string>
 
     <!-- FCM 전체 공지 알림 채널(로그인 없어 기기별 저장 대신 topic 구독 방식 사용) -->
     <string name="fcm_notice_channel_id" translatable="false">notice</string>
