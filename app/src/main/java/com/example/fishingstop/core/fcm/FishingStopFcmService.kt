@@ -8,11 +8,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.fishingstop.MainActivity
 import com.example.fishingstop.R
+import com.example.fishingstop.core.utils.Constants.TAG
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -48,6 +51,22 @@ class FishingStopFcmService : FirebaseMessagingService() {
             }
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
+        }
+
+        /** 공지 알림 켜기: [NOTICE_TOPIC] 토픽을 구독한다. */
+        fun subscribeNotice() {
+            FirebaseMessaging.getInstance().subscribeToTopic(NOTICE_TOPIC)
+                .addOnCompleteListener { task ->
+                    Log.d(TAG, "subscribeNotice: 구독 요청 성공 여부=${task.isSuccessful}", task.exception)
+                }
+        }
+
+        /** 공지 알림 끄기: [NOTICE_TOPIC] 토픽 구독을 해제한다. */
+        fun unsubscribeNotice() {
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(NOTICE_TOPIC)
+                .addOnCompleteListener { task ->
+                    Log.d(TAG, "unsubscribeNotice: 해제 요청 성공 여부=${task.isSuccessful}", task.exception)
+                }
         }
 
         private fun showNotification(context: Context, title: String, body: String) {

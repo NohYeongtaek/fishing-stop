@@ -53,6 +53,7 @@ fun SettingsScreen(
 ) {
     val themeMode by viewModel.themeMode.collectAsState()
     val elderMode by viewModel.elderMode.collectAsState()
+    val notificationEnabled by viewModel.notificationEnabled.collectAsState()
     val colors = AppTheme.colors
 
     // 숨은 관리자 게이트: 버전 텍스트 10탭 → PIN
@@ -130,6 +131,34 @@ fun SettingsScreen(
                 Switch(
                     checked = elderMode,
                     onCheckedChange = { viewModel.setElderMode(it) },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = colors.onGreen,
+                        checkedTrackColor = colors.greenPrimary,
+                        uncheckedThumbColor = colors.textTertiary,
+                        uncheckedTrackColor = colors.cardBg,
+                        uncheckedBorderColor = colors.borderInput
+                    )
+                )
+            }
+        }
+
+        // ── 알림 ──
+        SettingGroup(title = "알림") {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("공지 알림 받기", style = AppTheme.type.body, color = colors.textPrimary)
+                    Text(
+                        "새 공지사항이 등록되면 알림을 보내드립니다.",
+                        style = AppTheme.type.caption,
+                        color = colors.textTertiary
+                    )
+                }
+                Switch(
+                    checked = notificationEnabled,
+                    onCheckedChange = { viewModel.setNotificationEnabled(it) },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = colors.onGreen,
                         checkedTrackColor = colors.greenPrimary,

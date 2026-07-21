@@ -26,6 +26,10 @@ class SettingsRepositoryImpl @Inject constructor(
         prefs[KEY_ELDER] ?: false
     }
 
+    override val notificationEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_NOTIFICATION] ?: true
+    }
+
     override suspend fun setThemeMode(mode: ThemeMode) {
         dataStore.edit { it[KEY_THEME] = mode.name }
     }
@@ -34,8 +38,13 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { it[KEY_ELDER] = enabled }
     }
 
+    override suspend fun setNotificationEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_NOTIFICATION] = enabled }
+    }
+
     companion object {
         private val KEY_THEME = stringPreferencesKey("theme_mode")
         private val KEY_ELDER = booleanPreferencesKey("elder_mode")
+        private val KEY_NOTIFICATION = booleanPreferencesKey("notification_enabled")
     }
 }

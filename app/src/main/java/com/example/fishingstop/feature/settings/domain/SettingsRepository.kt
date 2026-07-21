@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.Flow
 interface SettingsRepository {
     val themeMode: Flow<ThemeMode>
     val elderMode: Flow<Boolean>
+    val notificationEnabled: Flow<Boolean>
 
     suspend fun setThemeMode(mode: ThemeMode)
     suspend fun setElderMode(enabled: Boolean)
+    suspend fun setNotificationEnabled(enabled: Boolean)
 }
