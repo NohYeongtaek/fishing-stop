@@ -9,6 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.initialize
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -25,11 +26,17 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        // Firebase 초기화 및 App Check(디버그) 설치
+        // Firebase 초기화 및 App Check 설치.
+        // 디버그 프로바이더는 앱 무결성을 검증하지 않고 등록된 토큰이면 통과시키므로
+        // 릴리스에 쓰면 안 된다(실질 검증 없이 API가 열려 쿼터/키 도용에 노출됨).
+        // 릴리스 빌드는 Play Integrity로 실제 기기·앱 서명을 검증한다.
         Firebase.initialize(this)
-        Firebase.appCheck.installAppCheckProviderFactory(
+        val appCheckProviderFactory = if (BuildConfig.DEBUG) {
             DebugAppCheckProviderFactory.getInstance()
-        )
+        } else {
+            PlayIntegrityAppCheckProviderFactory.getInstance()
+        }
+        Firebase.appCheck.installAppCheckProviderFactory(appCheckProviderFactory)
 
         // 공유로 전달된 텍스트(text/plain). 런처로 실행되면 null.
         val sharedText = extractSharedText(intent)
