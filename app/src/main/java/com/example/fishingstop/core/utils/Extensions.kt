@@ -60,7 +60,6 @@ fun LocalDateTime.toTimeAgo(): String {
 }
 
 // 예: "2026-12-06T15:30:22.123Z" -> "2026.12.06"
-@RequiresApi(Build.VERSION_CODES.O)
 fun String.toFormattedDate(): String {
     return try {
         val instant = Instant.parse(this)
