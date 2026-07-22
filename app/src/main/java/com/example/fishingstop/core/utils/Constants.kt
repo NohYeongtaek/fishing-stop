@@ -2,6 +2,9 @@ package com.example.fishingstop.core.utils
 
 object Constants {
     val TAG : String = "로그"
+
+    /** Google Safe Browsing API 요청의 client.clientId(등록된 앱 식별용 문자열). */
+    const val SAFE_BROWSING_CLIENT_ID: String = "com.example.fishingstop"
 }
 
 object Routes {

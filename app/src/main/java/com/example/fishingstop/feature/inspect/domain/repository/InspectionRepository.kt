@@ -20,12 +20,6 @@ interface InspectionRepository {
     suspend fun analyzeAndSave(text: String, method: InspectMethod): Long
 
     /**
-     * 텍스트를 AI로 분석만 한다(저장 없음).
-     * URL 검사처럼 휴리스틱 결과와 "병합"한 뒤 저장해야 하는 경로에서 사용한다.
-     */
-    suspend fun analyze(text: String): RiskAnalysis
-
-    /**
      * 이미 계산된 분석 결과(예: URL 휴리스틱)를 로컬에 저장한다.
      * AI를 거치지 않는 검사 경로가 결과 화면으로 합류할 때 사용한다.
      * @return 저장된 검사 기록의 id

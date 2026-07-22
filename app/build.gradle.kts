@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -9,6 +11,13 @@ plugins {
 
     // @Serializable Routes / DTO 직렬화를 위한 kotlin serialization 플러그인
     alias(libs.plugins.kotlin.serialization)
+}
+
+// local.properties(커밋되지 않음)에 있는 비밀 값을 읽어 BuildConfig 필드로 노출한다.
+// 파일/키가 없어도 build가 깨지지 않도록 빈 문자열로 기본값을 둔다(런타임에서 "미설정"으로 처리).
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { stream -> load(stream) }
 }
 
 android {
@@ -23,6 +32,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Google Safe Browsing v4 API 키(URL 평판 조회 1차 검사). 미설정 시 빈 문자열.
+        buildConfigField(
+            "String",
+            "SAFE_BROWSING_API_KEY",
+            "\"${localProperties.getProperty("SAFE_BROWSING_API_KEY", "")}\""
+        )
     }
 
     buildTypes {
