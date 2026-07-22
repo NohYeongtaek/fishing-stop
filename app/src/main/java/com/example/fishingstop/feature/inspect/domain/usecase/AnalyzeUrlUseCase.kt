@@ -11,10 +11,12 @@ import javax.inject.Inject
  * URL(링크/QR) 검사 유스케이스 — "휴리스틱(+리다이렉트 추적) + 2단계 평판 조회" 병합(기획 확정).
  *
  * 1) 로컬 휴리스틱([UrlRiskAnalyzer])으로 입력 전체를 즉시 검사하고,
- * 2) 대표 URL의 평판을 [CheckUrlReputationUseCase]로 조회한다(단축 URL 리다이렉트 추적 →
- *    Safe Browsing 1차 → 매치 없으면 Gemini 방문 분석 2차 — 문자 검사와 로직을 공유한다),
+ * 2) 대표 URL의 평판을 [CheckUrlReputationUseCase]로 조회한다 — 대표 URL을 실제로 HEAD
+ *    요청해보고 리다이렉트가 발견되면(등록된 단축 서비스 목록이 아닌 "행동" 기준) 실제
+ *    목적지로 재채점하고, 대표(또는 그 목적지) URL을 Safe Browsing 1차(매치 시 즉시 위험
+ *    확정) → 매치 없으면 Gemini 방문 분석 2차까지 확인한다(문자 검사와 이 로직을 공유한다).
  * 3) 두 결과를 보수적으로(더 위험한 쪽 기준) 병합해 저장한다.
- * 4) 원격 조회는 실패해도(네트워크 오류 등) 나머지 결과만으로 진행한다 → 오프라인에서도 동작.
+ * 4) 위 모든 원격 조회는 실패해도(네트워크 오류 등) 나머지 결과만으로 진행한다 → 오프라인에서도 동작.
  *
  * @return 성공 시 저장된 검사 기록 id
  */
@@ -34,7 +36,7 @@ class AnalyzeUrlUseCase @Inject constructor(
         val safeDomains = whitelistRepository.getSafeDomains()
         val heuristic = urlRiskAnalyzer.analyze(input, safeDomains)
 
-        // 대표 URL의 평판(리다이렉트 추적 + Safe Browsing + AI 방문 분석)은 보조 신호:
+        // 대표 URL의 평판(행동 기준 리다이렉트 추적 + Safe Browsing + AI 방문 분석)은 보조 신호:
         // 실패해도 검사 자체는 계속된다(오프라인 지원).
         val worstUrl = urlRiskAnalyzer.findWorstUrl(input, safeDomains)
         val reputation = worstUrl?.let { checkUrlReputationUseCase(it, safeDomains) }

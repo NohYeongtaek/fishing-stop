@@ -178,10 +178,17 @@ private fun ResultContent(
                 color = colors.textPrimary
             )
             AppCard {
-                result.signals.forEach { signal ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                        Text("•  ", style = AppTheme.type.body, color = colors.greenPrimary)
-                        Text(signal, style = AppTheme.type.body, color = colors.textPrimary)
+                Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.listGap)) {
+                    result.signals.forEach { signal ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                            Text("•  ", style = AppTheme.type.body, color = colors.greenPrimary)
+                            Text(
+                                signal,
+                                style = AppTheme.type.body,
+                                color = colors.textPrimary,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
