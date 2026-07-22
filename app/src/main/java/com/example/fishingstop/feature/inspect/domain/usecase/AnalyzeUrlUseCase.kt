@@ -16,7 +16,8 @@ import javax.inject.Inject
  * URL(링크/QR) 검사 유스케이스 — "휴리스틱(+리다이렉트 추적) + 2단계 평판 조회" 병합(기획 확정).
  *
  * 1) 로컬 휴리스틱([UrlRiskAnalyzer])으로 즉시 검사하고,
- * 2) 대표 URL이 단축 URL이면 실제 목적지를 리다이렉트로 추적해 재채점한 뒤 병합하고,
+ * 2) 대표 URL을 실제로 HEAD 요청해보고 리다이렉트가 발견되면(도메인 목록이 아닌 "행동" 기준)
+ *    실제 목적지를 재채점한 뒤 병합하고,
  * 3) 대표(또는 리다이렉트로 밝혀진) URL을 Google Safe Browsing으로 조회한다.
  *    - 매치(이미 알려진 악성/피싱 URL)면 그 즉시 위험(DANGER)으로 확정하고 4)는 생략한다
  *      (비용·속도상 이점 + 이미 확인된 위협이므로 추가 판단이 불필요).
@@ -46,13 +47,16 @@ class AnalyzeUrlUseCase @Inject constructor(
         val safeDomains = whitelistRepository.getSafeDomains()
         var heuristic = urlRiskAnalyzer.analyze(input, safeDomains)
 
-        // 대표 URL이 단축 URL이면 실제 목적지를 추적해 재채점 후 병합한다.
+        // 대표 URL은 목록에 등록된 "알려진 단축 서비스"인지와 무관하게 항상 한 번 HEAD로
+        // 찔러보고, 실제로 리다이렉트가 나오면(=행동 기준) 그 목적지로 재채점 후 병합한다.
+        // 등록된 단축 서비스 목록에 없는 QR 생성기·리다이렉터도 이렇게 잡아낸다.
         // (실패해도 검사 자체는 계속된다 — 오프라인/네트워크 오류 대응)
         var effectiveUrl = urlRiskAnalyzer.findWorstUrl(input, safeDomains)
-        if (effectiveUrl != null && urlRiskAnalyzer.isShortener(effectiveUrl)) {
+        if (effectiveUrl != null) {
+            val originalHost = urlRiskAnalyzer.hostOf(effectiveUrl)
             val resolvedHost = runCatching { urlRedirectResolver.resolveFinalHost(effectiveUrl) }
                 .getOrNull()
-            if (resolvedHost != null) {
+            if (resolvedHost != null && resolvedHost != originalHost) {
                 val resolved = urlRiskAnalyzer.analyzeResolvedHost(resolvedHost, safeDomains)
                 heuristic = mergeResolved(heuristic, resolved, resolvedHost)
                 effectiveUrl = resolvedHost
