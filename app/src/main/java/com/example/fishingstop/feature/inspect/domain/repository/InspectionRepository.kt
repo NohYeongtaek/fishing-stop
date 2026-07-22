@@ -14,10 +14,10 @@ import kotlinx.coroutines.flow.Flow
 interface InspectionRepository {
 
     /**
-     * 텍스트를 AI로 분석하고 결과를 로컬에 저장한다.
-     * @return 저장된 검사 기록의 id (결과 화면으로 전달)
+     * 텍스트를 AI로 분석만 한다(저장하지 않음). 동일 문자 재분석 시 세션 캐시를 탄다.
+     * 호출측(유스케이스)이 다른 소스(URL 평판 등)와 병합한 뒤 [save]로 저장하는 흐름에 쓴다.
      */
-    suspend fun analyzeAndSave(text: String, method: InspectMethod): Long
+    suspend fun analyze(text: String): RiskAnalysis
 
     /**
      * 이미 계산된 분석 결과(예: URL 휴리스틱)를 로컬에 저장한다.
