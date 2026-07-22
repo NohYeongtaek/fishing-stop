@@ -2,8 +2,10 @@ package com.example.fishingstop.feature.consent.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -96,16 +98,26 @@ fun ConsentScreen(
                 color = colors.textPrimary
             )
 
-            Text(
-                text = "• 개인정보는 분석에 필요한 최소한만 전송됩니다.\n" +
-                    "• 사용자 동의 없이 문자 내용을 서버에 저장하지 않습니다.\n" +
-                    "• 신고 시 문자 원문·발신번호 등 신고에 필요한 정보를 수집·보관하며, " +
-                    "수사기관 신고 목적으로 담당자가 확인·전달할 수 있습니다. 처리 완료 후 파기됩니다.\n" +
-                    "• 신고 시 신고자 개인정보(연락처 등)는 수집하지 않습니다(익명).\n" +
-                    "• AI 분석 결과는 참고 정보이며 법적 증거가 아닙니다.",
-                style = AppTheme.type.body,
-                color = colors.textSecondary
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.listGap)) {
+                listOf(
+                    "개인정보는 분석에 필요한 최소한만 전송됩니다.",
+                    "사용자 동의 없이 문자 내용을 서버에 저장하지 않습니다.",
+                    "신고 시 문자 원문·발신번호 등 신고에 필요한 정보를 수집·보관하며, " +
+                        "수사기관 신고 목적으로 담당자가 확인·전달할 수 있습니다. 처리 완료 후 파기됩니다.",
+                    "신고 시 신고자 개인정보(연락처 등)는 수집하지 않습니다(익명).",
+                    "AI 분석 결과는 참고 정보이며 법적 증거가 아닙니다."
+                ).forEach { line ->
+                    Row(Modifier.fillMaxWidth()) {
+                        Text("• ", style = AppTheme.type.body, color = colors.textSecondary)
+                        Text(
+                            line,
+                            style = AppTheme.type.body,
+                            color = colors.textSecondary,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
 
             TextButton(onClick = onOpenPrivacyPolicy) {
                 Text(
