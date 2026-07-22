@@ -47,9 +47,6 @@ class InspectionRepositoryImpl @Inject constructor(
     override suspend fun save(text: String, method: InspectMethod, analysis: RiskAnalysis): Long =
         withContext(ioDispatcher) { persist(text, method, analysis) }
 
-    override suspend fun analyze(text: String): RiskAnalysis =
-        withContext(ioDispatcher) { analyzeCached(text) }
-
     /** 캐시 조회 → 없으면 Gemini 분석 후 저장. 실패(예외)는 캐시하지 않는다(다음에 재시도 가능). */
     private suspend fun analyzeCached(text: String): RiskAnalysis {
         val key = text.trim()

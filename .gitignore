@@ -30,3 +30,6 @@ replay_pid*
 
 # IDE
 .idea/
+
+# Local config (SDK path, API keys) — must never be committed
+/local.properties
