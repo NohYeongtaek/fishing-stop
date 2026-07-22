@@ -11,9 +11,10 @@ import com.example.fishingstop.feature.inspect.domain.repository.UrlVisitAnalysi
 import javax.inject.Inject
 
 /**
- * 대표 URL 하나의 평판을 조회한다: 단축 URL이면 실제 목적지로 재평가하고,
- * Google Safe Browsing(1차, 알려진 위협이면 즉시 확정) → 매치가 없을 때만 Gemini의 URL Context
- * 도구로 실제 페이지를 방문해 분석(2차)까지 확인한다.
+ * 대표 URL 하나의 평판을 조회한다: 실제로 HEAD 요청해보고 리다이렉트가 발견되면(등록된
+ * 단축 서비스 목록이 아닌 "행동" 기준 — 목록에 없는 QR 생성기·자체 리다이렉터도 잡아낸다)
+ * 그 목적지로 재평가하고, Google Safe Browsing(1차, 알려진 위협이면 즉시 확정) → 매치가
+ * 없을 때만 Gemini의 URL Context 도구로 실제 페이지를 방문해 분석(2차)까지 확인한다.
  *
  * 링크 직접검사([AnalyzeUrlUseCase])와 문자 종합검사 내 URL 평판 확인([AnalyzeMessageUseCase])이
  * 이 로직을 공유해, 문자에 포함된 링크도 링크 직접검사와 동일한 수준으로 검증되게 한다.
@@ -34,17 +35,17 @@ class CheckUrlReputationUseCase @Inject constructor(
         var effectiveUrl = url
         var redirectAnalysis: RiskAnalysis? = null
 
-        // 단축 URL(목적지 은닉)이면 실제 목적지를 추적해 그 목적지를 기준으로 재평가한다.
+        // 등록된 "알려진 단축 서비스" 목록 여부와 무관하게 항상 한 번 HEAD로 찔러보고,
+        // 실제로 리다이렉트가 나오면(=행동 기준) 그 목적지를 기준으로 재평가한다.
         // 실패해도(네트워크 오류 등) 원본 URL 기준으로 계속 진행한다.
-        if (urlRiskAnalyzer.isShortener(url)) {
-            val resolvedHost = runCatching { urlRedirectResolver.resolveFinalHost(url) }.getOrNull()
-            if (resolvedHost != null) {
-                val resolved = urlRiskAnalyzer.analyzeResolvedHost(resolvedHost, safeDomains)
-                redirectAnalysis = resolved.copy(
-                    signals = (listOf("실제 목적지: $resolvedHost") + resolved.signals).distinct().take(5)
-                )
-                effectiveUrl = resolvedHost
-            }
+        val originalHost = urlRiskAnalyzer.hostOf(url)
+        val resolvedHost = runCatching { urlRedirectResolver.resolveFinalHost(url) }.getOrNull()
+        if (resolvedHost != null && resolvedHost != originalHost) {
+            val resolved = urlRiskAnalyzer.analyzeResolvedHost(resolvedHost, safeDomains)
+            redirectAnalysis = resolved.copy(
+                signals = (listOf("실제 목적지: $resolvedHost") + resolved.signals).distinct().take(5)
+            )
+            effectiveUrl = resolvedHost
         }
 
         val remote = analyzeRemote(effectiveUrl)
