@@ -37,12 +37,8 @@ class InspectionRepositoryImpl @Inject constructor(
             size > CACHE_MAX
     }
 
-    override suspend fun analyzeAndSave(text: String, method: InspectMethod): Long =
-        withContext(ioDispatcher) {
-            // 1) Gemini 분석(캐시) → 2) 점수 기반 등급 도출 → 3) 로컬 저장
-            val analysis = analyzeCached(text)
-            persist(text, method, analysis)
-        }
+    override suspend fun analyze(text: String): RiskAnalysis =
+        withContext(ioDispatcher) { analyzeCached(text) }
 
     override suspend fun save(text: String, method: InspectMethod, analysis: RiskAnalysis): Long =
         withContext(ioDispatcher) { persist(text, method, analysis) }
