@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.fishingstop.core.ui.components.AppCard
 import com.example.fishingstop.core.ui.components.AppScaffold
@@ -55,10 +55,20 @@ fun EducationDetailScreen(
             // 의심 신호 = 주의(warn) 박스
             WarnBox {
                 Text("이런 신호를 의심하세요", style = AppTheme.type.cardLabel, color = colors.warnText)
-                category.warningSigns.forEach { line ->
-                    Row(Modifier.padding(top = 6.dp)) {
-                        Text("• ", style = AppTheme.type.body, color = colors.warnText)
-                        Text(line, style = AppTheme.type.body, color = colors.warnText)
+                Column(
+                    modifier = Modifier.padding(top = AppTheme.spacing.listGap),
+                    verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.listGap)
+                ) {
+                    category.warningSigns.forEach { line ->
+                        Row(Modifier.fillMaxWidth()) {
+                            Text("• ", style = AppTheme.type.body, color = colors.warnText)
+                            Text(
+                                line,
+                                style = AppTheme.type.body,
+                                color = colors.warnText,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
@@ -66,10 +76,20 @@ fun EducationDetailScreen(
             // 대처법 = 일반 카드
             AppCard {
                 Text("이렇게 대처하세요", style = AppTheme.type.cardLabel, color = colors.textPrimary)
-                category.tips.forEach { line ->
-                    Row(Modifier.padding(top = 6.dp)) {
-                        Text("• ", style = AppTheme.type.body)
-                        Text(line, style = AppTheme.type.body, color = colors.textPrimary)
+                Column(
+                    modifier = Modifier.padding(top = AppTheme.spacing.listGap),
+                    verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.listGap)
+                ) {
+                    category.tips.forEach { line ->
+                        Row(Modifier.fillMaxWidth()) {
+                            Text("• ", style = AppTheme.type.body)
+                            Text(
+                                line,
+                                style = AppTheme.type.body,
+                                color = colors.textPrimary,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
