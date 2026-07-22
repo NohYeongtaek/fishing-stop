@@ -56,10 +56,15 @@ class UrlRiskAnalyzer @Inject constructor() {
     fun findWorstUrl(text: String, safeDomains: Set<String> = emptySet()): String? =
         extractUrls(text).maxByOrNull { scoreUrl(it, safeDomains).score }
 
-    /** 주어진 URL이 단축 URL 서비스(목적지 은닉)인지 여부. */
-    fun isShortener(url: String): Boolean {
+    /** URL에서 호스트만 뽑아낸다(스킴 없으면 보정). 파싱 실패 시 null. */
+    fun hostOf(url: String): String? {
         val normalized = if (url.contains("://")) url else "http://$url"
-        val host = runCatching { URI(normalized).host?.lowercase() }.getOrNull() ?: return false
+        return runCatching { URI(normalized).host?.lowercase() }.getOrNull()
+    }
+
+    /** 주어진 URL이 (알려진) 단축 URL 서비스(목적지 은닉)인지 여부 — 근거 문구용 보조 신호. */
+    fun isShortener(url: String): Boolean {
+        val host = hostOf(url) ?: return false
         return SHORTENERS.any { host == it || host.endsWith(".$it") }
     }
 
