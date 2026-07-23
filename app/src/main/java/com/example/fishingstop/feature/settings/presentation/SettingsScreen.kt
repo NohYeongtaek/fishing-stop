@@ -43,12 +43,14 @@ import com.example.fishingstop.ui.theme.AppTheme
  * @param onOpenNotice  공지사항 화면으로 이동
  * @param onOpenPrivacy 개인정보 처리방침 화면으로 이동
  * @param onOpenAdmin 관리자 PIN 통과 시 관리자 화면으로 이동
+ * @param elderModeCoachMarkModifier 홈 탭 코치마크가 어르신 모드 행을 짚어주기 위한 modifier
  */
 @Composable
 fun SettingsScreen(
     onOpenNotice: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenAdmin: () -> Unit,
+    elderModeCoachMarkModifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val themeMode by viewModel.themeMode.collectAsState()
@@ -117,7 +119,10 @@ fun SettingsScreen(
         // ── 어르신 모드 ──
         SettingGroup(title = "접근성") {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .then(elderModeCoachMarkModifier),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(Modifier.weight(1f)) {

@@ -17,7 +17,9 @@ data class BottomBarItem(
     val label: String,
     val icon: ImageVector,
     val selected: Boolean,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
+    /** 아이콘에 적용할 추가 modifier(예: 코치마크 타겟 지정용). */
+    val iconModifier: Modifier = Modifier
 )
 
 /**
@@ -36,7 +38,7 @@ fun AppBottomBar(items: List<BottomBarItem>) {
                     Icon(
                         item.icon,
                         contentDescription = item.label,
-                        modifier = Modifier.size(AppTheme.sizes.tabIcon)
+                        modifier = item.iconModifier.size(AppTheme.sizes.tabIcon)
                     )
                 },
                 label = { Text(item.label, style = AppTheme.type.tabLabel) },
