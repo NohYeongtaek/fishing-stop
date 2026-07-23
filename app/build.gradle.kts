@@ -21,11 +21,11 @@ val localProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.example.fishingstop"
+    namespace = "com.rocketdan24.fishingstop"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.example.fishingstop"
+        applicationId = "com.rocketdan24.fishingstop"
         minSdk = 24
         targetSdk = 37
         versionCode = 1
