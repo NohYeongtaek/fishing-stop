@@ -9,6 +9,25 @@
       "client_info": {
         "mobilesdk_app_id": "1:505942757449:android:a9b27bfecfadc758c7ef98",
         "android_client_info": {
+          "package_name": "com.example.fishingstop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIG4gZvn6FoM8YfbuUtaAruwVsPxAl4ow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:505942757449:android:7d253a1e6ebeb5dec7ef98",
+        "android_client_info": {
           "package_name": "com.rocketdan24.fishingstop"
         }
       },

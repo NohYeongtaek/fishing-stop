@@ -39,13 +39,16 @@ class FishingStopFcmService : FirebaseMessagingService() {
         /** 전체 공지 브로드캐스트용 토픽 이름. 서버/콘솔에서 발송 시 동일한 이름을 사용해야 한다. */
         const val NOTICE_TOPIC = "notice_all"
 
-        /** 앱 시작 시 한 번 호출해 알림 채널을 준비한다(API 26+, 이미 있으면 아무 일도 하지 않음). */
+        /**
+         * 앱 시작 시 한 번 호출해 알림 채널을 준비한다(API 26+, 이미 있으면 아무 일도 하지 않음).
+         * 상단에서 배너로 내려오는 헤드업 알림이 뜨려면 채널 중요도가 HIGH 이상이어야 한다.
+         */
         fun ensureNotificationChannel(context: Context) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
             val channel = NotificationChannel(
                 context.getString(R.string.fcm_notice_channel_id),
                 context.getString(R.string.fcm_notice_channel_name),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.fcm_notice_channel_desc)
             }
@@ -95,6 +98,7 @@ class FishingStopFcmService : FirebaseMessagingService() {
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build()
 
             NotificationManagerCompat.from(context)
