@@ -31,5 +31,8 @@ replay_pid*
 # IDE
 .idea/
 
+# macOS
+.DS_Store
+
 # Local config (SDK path, API keys) — must never be committed
 /local.properties
