@@ -1,13 +1,17 @@
 package com.example.fishingstop.ui.theme
 
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Density
+import androidx.core.view.WindowCompat
 
 /**
  * 앱 테마. (다크, 어르신) 조합에 맞춰 커스텀 디자인 토큰(AppColors/Type/Shapes/Sizes/Spacing)을
@@ -75,6 +79,20 @@ fun FishingstopTheme(
         density = LocalDensity.current.density,
         fontScale = 1f
     )
+
+    // MainActivity의 enableEdgeToEdge()는 "실제 시스템" 다크모드 여부만 보고 상태바/내비게이션바
+    // 아이콘 색을 한 번 정한다. 이 앱은 시스템과 무관하게 자체 테마 설정(라이트/다크/시스템)을
+    // 가질 수 있어서(darkTheme), 그 값이 바뀔 때마다 상태바 아이콘 색을 직접 다시 맞춰야
+    // 시스템이 라이트인데 앱을 다크로 켠 경우 검정 글씨가 어두운 배경에 묻히는 문제가 없다.
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
+        }
+    }
 
     CompositionLocalProvider(
         LocalDensity provides fixedFontScaleDensity,
