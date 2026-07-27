@@ -196,7 +196,8 @@ fun FishingStopNavGraph(
                 onReport = { id -> navController.navigate(Routes.Report(id)) },
                 // 홈을 재생성(navigate+popUpTo)하면 탭 상태가 날아가므로,
                 // 백스택의 기존 홈으로 "되돌아간다" — 보던 탭이 그대로 유지된다.
-                onHome = { navController.popBackStack(Routes.Home, inclusive = false) }
+                onHome = { navController.popBackStack(Routes.Home, inclusive = false) },
+                onBack = { navController.popBackStack() }
             )
         }
 
