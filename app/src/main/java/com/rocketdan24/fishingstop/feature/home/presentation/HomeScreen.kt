@@ -119,7 +119,12 @@ fun HomeScreen(
     val photoGuideStepIndex = 2
     val coachMarkState = rememberCoachMarkState(stepCount = HomeTab.entries.size + 3)
 
-    LaunchedEffect(coachMarkState.currentIndex) {
+    // coachMarkState는 rememberSaveable이 아니라서(코치마크는 항상 0단계부터 다시 시작),
+    // 검사기록 상세 등 다른 화면에 갔다가 뒤로 돌아와 홈이 재구성될 때마다 currentIndex가
+    // 0으로 리셋된다. 코치마크가 실제로 떠 있을 때만 탭을 따라 움직이게 해야, 이미 코치마크를
+    // 본 사용자가 뒤로가기로 돌아왔을 때 보던 탭(selectedTab)이 0번(홈)으로 튀지 않는다.
+    LaunchedEffect(coachMarkState.currentIndex, showCoachMark) {
+        if (!showCoachMark) return@LaunchedEffect
         val index = coachMarkState.currentIndex
         when {
             index == 0 -> selectedTab = 0

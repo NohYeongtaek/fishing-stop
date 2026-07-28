@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rocketdan24.fishingstop.core.ui.components.AppCard
 import com.rocketdan24.fishingstop.core.ui.components.AppScaffold
+import com.rocketdan24.fishingstop.core.ui.components.AppTopBar
 import com.rocketdan24.fishingstop.core.ui.components.DisclaimerText
 import com.rocketdan24.fishingstop.core.ui.components.PrimaryButton
 import com.rocketdan24.fishingstop.core.ui.components.SecondaryButton
@@ -49,16 +50,18 @@ import com.rocketdan24.fishingstop.ui.theme.AppTheme
  *
  * @param onReport 신고 화면으로 이동(id 전달)
  * @param onHome   홈으로 이동
+ * @param onBack   상단바 뒤로가기(검사기록에서 들어온 경우 검사기록으로, 그 외에는 이전 화면으로)
  */
 @Composable
 fun InspectResultScreen(
     onReport: (Long) -> Unit,
     onHome: () -> Unit,
+    onBack: () -> Unit,
     viewModel: InspectResultViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    AppScaffold { innerPadding ->
+    AppScaffold(topBar = { AppTopBar(title = "검사 결과", onBack = onBack) }) { innerPadding ->
         when (val s = state) {
             is InspectResultUiState.Loading ->
                 Box(Modifier.fillMaxSize().padding(innerPadding), Alignment.Center) {
