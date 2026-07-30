@@ -9,7 +9,7 @@
 
 ## 시연 영상
 
-[시연영상.mp4 보기](<피싱멈춰! 화면 캡쳐/시연영상.mp4>)
+[demo.mp4 보기](screenshots/demo.mp4)
 
 ## 왜 만들었는가
 
@@ -34,11 +34,11 @@
 
 | | | | |
 | --- | --- | --- | --- |
-| ![검사 중](<피싱멈춰! 화면 캡쳐/readme_thumbs/검사 중.png>) | ![검사 결과](<피싱멈춰! 화면 캡쳐/readme_thumbs/검사 결과.png>) | ![공유로 검사하기](<피싱멈춰! 화면 캡쳐/readme_thumbs/공유로 검사하기.png>) | ![QR 코드 검사](<피싱멈춰! 화면 캡쳐/readme_thumbs/직접검사 - QR 코드 검사.png>) |
+| ![검사 중](screenshots/readme_thumbs/01_inspecting.png) | ![검사 결과](screenshots/readme_thumbs/02_result.png) | ![공유로 검사하기](screenshots/readme_thumbs/03_share.png) | ![QR 코드 검사](screenshots/readme_thumbs/04_qr.png) |
 | 검사 중 (진행률 표시) | 검사 결과 | 공유로 검사하기 | QR 코드 검사 |
-| ![검사 기록](<피싱멈춰! 화면 캡쳐/readme_thumbs/검사 기록 - 즐겨찾기.png>) | ![신고하기](<피싱멈춰! 화면 캡쳐/readme_thumbs/신고하기.png>) | ![피싱 예방 교육](<피싱멈춰! 화면 캡쳐/readme_thumbs/피싱 예방.png>) | ![코치마크 온보딩](<피싱멈춰! 화면 캡쳐/readme_thumbs/코치마크 - 검사 시작.png>) |
+| ![검사 기록](screenshots/readme_thumbs/05_history.png) | ![신고하기](screenshots/readme_thumbs/06_report.png) | ![피싱 예방 교육](screenshots/readme_thumbs/07_education.png) | ![코치마크 온보딩](screenshots/readme_thumbs/08_coachmark.png) |
 | 검사 기록 · 즐겨찾기 | 신고하기 | 피싱 예방 교육 | 코치마크 온보딩 |
-| ![관리자 모드](<피싱멈춰! 화면 캡쳐/readme_thumbs/관리자 모드 - 공지 작성.png>) | ![다크 모드](<피싱멈춰! 화면 캡쳐/readme_thumbs/다크모드 - 홈.png>) | ![어르신 모드](<피싱멈춰! 화면 캡쳐/readme_thumbs/어르신 모드 - 홈.png>) | ![텍스트 추출](<피싱멈춰! 화면 캡쳐/readme_thumbs/텍스트 추출.png>) |
+| ![관리자 모드](screenshots/readme_thumbs/09_admin.png) | ![다크 모드](screenshots/readme_thumbs/10_darkmode.png) | ![어르신 모드](screenshots/readme_thumbs/11_seniormode.png) | ![텍스트 추출](screenshots/readme_thumbs/12_ocr.png) |
 | 관리자 모드 · 공지 작성 | 다크 모드 | 어르신 모드 | 이미지 텍스트 추출(OCR) |
 
 ## 링크 피싱 탐지 2단계 검증 시스템
