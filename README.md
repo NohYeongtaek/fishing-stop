@@ -9,7 +9,9 @@
 
 ## 시연 영상
 
-[demo.mp4 보기](screenshots/demo.mp4)
+![데모](screenshots/demo.gif)
+
+전체 버전은 [시연 영상(유튜브)](https://youtube.com/shorts/1qpkGDDMsLI)에서 볼 수 있습니다.
 
 ## 왜 만들었는가
 
