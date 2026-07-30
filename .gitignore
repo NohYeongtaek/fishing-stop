@@ -36,3 +36,6 @@ replay_pid*
 
 # Local config (SDK path, API keys) — must never be committed
 /local.properties
+
+# 원본 데모 영상(72MB) — README에는 경량 GIF(screenshots/demo.gif)만 사용
+/screenshots/demo.mp4
