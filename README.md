@@ -11,8 +11,6 @@
 
 ![데모](screenshots/demo.gif)
 
-전체 버전은 [시연 영상(유튜브)](https://youtube.com/shorts/1qpkGDDMsLI)에서 볼 수 있습니다.
-
 ## 왜 만들었는가
 
 보이스피싱·스미싱은 문자, 링크, 이미지, QR 코드 등 점점 더 다양한 형태로 진화하고 있는데,
@@ -95,8 +93,3 @@ cp local.properties.sample local.properties
 그 다음 `local.properties`를 열어 `sdk.dir`(Android Studio에서 프로젝트를 한 번 열면 자동으로
 채워지기도 함)와, 필요하면 `SAFE_BROWSING_API_KEY`(링크 검사 1차 관문 — 없어도 빌드/실행은 됨,
 발급 방법은 파일 안 주석 참고)를 채운다.
-
-## 관련 링크
-
-- GitHub: [NohYeongtaek/fishing-stop](https://github.com/NohYeongtaek/fishing-stop)
-- 시연 영상(짧은 버전): [youtube.com/shorts/1qpkGDDMsLI](https://youtube.com/shorts/1qpkGDDMsLI)
