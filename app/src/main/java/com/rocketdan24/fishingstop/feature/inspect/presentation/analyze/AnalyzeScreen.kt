@@ -44,6 +44,7 @@ fun AnalyzeScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val colors = AppTheme.colors
+    val ringSize = AppTheme.sizes.analyzeRing
 
     // 성공 상태가 되면 한 번만 결과 화면으로 이동
     LaunchedEffect(state) {
@@ -59,7 +60,9 @@ fun AnalyzeScreen(
                 progress = 0f
                 while (isActive && progress < 0.95f) {
                     delay(175)
-                    progress += (0.95f - progress) * 0.055f
+                    // ponytail: floor the step so the ring keeps visibly creeping on slow
+                    // requests instead of asymptotically freezing just under 95%.
+                    progress += maxOf((0.95f - progress) * 0.055f, 0.003f)
                 }
             }
             is AnalyzeUiState.Success -> progress = 1f
@@ -85,7 +88,7 @@ fun AnalyzeScreen(
                 Box(contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(
                         progress = { animatedProgress },
-                        modifier = Modifier.size(96.dp),
+                        modifier = Modifier.size(ringSize),
                         color = colors.greenPrimary,
                         strokeWidth = 8.dp
                     )
@@ -127,12 +130,12 @@ fun AnalyzeScreen(
                 Box(contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(
                         progress = { animatedProgress },
-                        modifier = Modifier.size(96.dp),
+                        modifier = Modifier.size(ringSize),
                         color = colors.greenPrimary,
                         strokeWidth = 8.dp
                     )
                     Text(
-                        text = "100%",
+                        text = "${(animatedProgress * 100).toInt()}%",
                         style = AppTheme.type.scoreNum,
                         color = colors.greenPrimary
                     )

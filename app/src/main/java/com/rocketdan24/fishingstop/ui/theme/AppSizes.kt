@@ -15,7 +15,8 @@ data class AppSizes(
     val switchH: Dp,
     val statusCircle: Dp,
     val borderCard: Dp,
-    val borderInput: Dp
+    val borderInput: Dp,
+    val analyzeRing: Dp
 )
 
 val NormalSizes = AppSizes(
@@ -29,7 +30,8 @@ val NormalSizes = AppSizes(
     switchH = 32.dp,
     statusCircle = 84.dp,
     borderCard = 0.dp,
-    borderInput = 2.dp
+    borderInput = 2.dp,
+    analyzeRing = 96.dp
 )
 
 val ElderSizes = AppSizes(
@@ -43,7 +45,8 @@ val ElderSizes = AppSizes(
     switchH = 38.dp,
     statusCircle = 100.dp,
     borderCard = 2.dp,
-    borderInput = 3.dp
+    borderInput = 3.dp,
+    analyzeRing = 116.dp
 )
 
 fun appSizesFor(elder: Boolean): AppSizes = if (elder) ElderSizes else NormalSizes
