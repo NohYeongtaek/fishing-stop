@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,9 +65,8 @@ internal data class CoachMarkTargetInfo(
  * 홈 탭 코치마크 진행 상태. [stepCount]개의 순번(0..stepCount-1)을 순서대로 밟아나간다.
  * 각 타겟은 화면에 실제로 배치될 때 [coachMarkTarget] modifier로 위치/모양/설명을 등록한다.
  */
-class CoachMarkState(private val stepCount: Int) {
-    var currentIndex by mutableIntStateOf(0)
-        private set
+class CoachMarkState(private val stepCount: Int, private val indexState: MutableState<Int>) {
+    val currentIndex: Int get() = indexState.value
 
     internal val targets = mutableStateMapOf<Int, CoachMarkTargetInfo>()
 
@@ -75,14 +76,19 @@ class CoachMarkState(private val stepCount: Int) {
 
     /** 현재 타겟을 탭했을 때 호출한다. 다음 단계로 넘어가고, 모든 단계가 끝났으면 true를 반환한다. */
     fun advance(): Boolean {
-        currentIndex++
-        return currentIndex >= stepCount
+        indexState.value++
+        return indexState.value >= stepCount
     }
 }
 
+// currentIndex를 rememberSaveable로 보존해야, 예방교육 상세 등 다른 화면에 갔다가
+// "뒤로"로 돌아와 홈이 재구성될 때 0으로 리셋되어 selectedTab을 홈 탭으로 되돌리는 걸 막는다
+// (selectedTab과 동일한 이유로 rememberSaveable 필요).
 @Composable
-fun rememberCoachMarkState(stepCount: Int): CoachMarkState =
-    remember(stepCount) { CoachMarkState(stepCount) }
+fun rememberCoachMarkState(stepCount: Int): CoachMarkState {
+    val indexState = rememberSaveable { mutableIntStateOf(0) }
+    return remember(stepCount) { CoachMarkState(stepCount, indexState) }
+}
 
 /** Compose 요소를 코치마크 타겟(순번 [index])으로 등록한다. */
 fun Modifier.coachMarkTarget(

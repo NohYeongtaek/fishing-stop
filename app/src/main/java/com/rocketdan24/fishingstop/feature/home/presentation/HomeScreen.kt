@@ -323,7 +323,12 @@ private fun RippleWaves(color: Color) {
 
 /** 기본 메시지 앱을 연다. 없으면 안내 토스트. */
 private fun openMessagingApp(context: android.content.Context) {
-    val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_MESSAGING)
+    val intent = Intent(Intent.ACTION_MAIN)
+        .addCategory(Intent.CATEGORY_APP_MESSAGING)
+        // NEW_TASK 없이 열면 메시지 앱이 우리 액티비티 스택에 그대로 쌓여서,
+        // 메시지 앱 → 앱으로 돌아온 뒤 뒤로가기를 누르면 우리 화면이 아니라
+        // 다시 메시지 앱으로 돌아가 버린다. 별도 태스크로 띄워 스택을 분리한다.
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     runCatching { context.startActivity(intent) }
         .onFailure {
             Toast.makeText(context, "메시지 앱을 열 수 없습니다. '직접검사' 탭을 이용해 주세요.", Toast.LENGTH_LONG).show()
